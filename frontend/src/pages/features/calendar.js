@@ -1,284 +1,506 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
-export default function Calendar() {
-    const router = useRouter();
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [showCamera, setShowCamera] = useState(false);
+export default function Dashboard() {
+  const router = useRouter();
+  const [events, setEvents] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [showEntryModal, setShowEntryModal] = useState(false);
+  const [calendarData, setCalendarData] = useState({});
 
-    // Mock calendar data
-    const calendarData = {
-        '2024-02-01': { completed: true, score: 85, products: 5, photo: true },
-        '2024-02-02': { completed: true, score: 82, products: 5, photo: true },
-        '2024-02-03': { completed: true, score: 88, products: 4, photo: false },
-        '2024-02-04': { completed: false, score: null, products: 0, photo: false },
-        '2024-02-05': { completed: true, score: 90, products: 5, photo: true },
-        '2024-02-06': { completed: true, score: 87, products: 5, photo: true },
-        '2024-02-07': { completed: true, score: 89, products: 5, photo: true }
-    };
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+    fetchCalendarData();
+  }, []);
 
-    const selectedEntry = selectedDate ? calendarData[selectedDate] : null;
+  const fetchCalendarData = async () => {
+    const token = localStorage.getItem('access_token');
+    try {
+      const response = await fetch('http://localhost:8000/skincare/calendar/entries', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setCalendarData(data);
+      
+      // Convert to FullCalendar events format
+      const calendarEvents = Object.entries(data).map(([date, entry]) => ({
+        id: entry.id,
+        title: `${entry.skin_condition || 'Entry'} ${entry.has_image ? '📷' : ''}`,
+        date: date,
+        backgroundColor: entry.has_image ? '#4F46E5' : '#818CF8',
+        borderColor: entry.has_image ? '#4338CA' : '#6366F1',
+        extendedProps: {
+          ...entry
+        }
+      }));
+      
+      setEvents(calendarEvents);
+    } catch (error) {
+      console.error('Error fetching calendar data:', error);
+    }
+  };
 
-    const mockAnalysis = {
-        acne: { score: 15, status: 'Low' },
-        oiliness: { score: 42, status: 'Moderate' },
-        hydration: { score: 75, status: 'Good' },
-        redness: { score: 8, status: 'Minimal' },
-        overall: 89,
-        insights: [
-            'Skin looks well-hydrated',
-            'Minimal breakouts detected',
-            'T-zone showing slight oiliness',
-            'Continue current routine'
-        ]
-    };
+  const fetchEntryByDate = async (dateStr) => {
+    const token = localStorage.getItem('access_token');
+    
+    try {
+      const response = await fetch(`http://localhost:8000/skincare/entries/${dateStr}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedEntry(data);
+      } else {
+        setSelectedEntry(null);
+      }
+      setShowEntryModal(true);
+    } catch (error) {
+      console.error('Error fetching entry:', error);
+      setSelectedEntry(null);
+      setShowEntryModal(true);
+    }
+  };
 
-    const mockProducts = [
-        { name: 'Gentle Cleanser', time: '7:30 AM', category: 'cleanser' },
-        { name: 'Vitamin C Serum', time: '7:32 AM', category: 'serum' },
-        { name: 'Moisturizer', time: '7:35 AM', category: 'moisturizer' },
-        { name: 'Sunscreen SPF 50', time: '7:37 AM', category: 'sunscreen' },
-        { name: 'Retinol Cream', time: '10:15 PM', category: 'treatment' }
-    ];
+  const handleDateClick = (arg) => {
+    setSelectedDate(arg.dateStr);
+    fetchEntryByDate(arg.dateStr);
+  };
 
-    const getDayStatus = (dateStr) => {
-        const data = calendarData[dateStr];
-        if (!data) return 'bg-gray-100 text-gray-400';
-        if (data.completed && data.score >= 85) return 'bg-green-100 text-green-800 border-2 border-green-400';
-        if (data.completed) return 'bg-blue-100 text-blue-800 border-2 border-blue-400';
-        return 'bg-red-100 text-red-800 border-2 border-red-400';
-    };
+  const handleEventClick = (info) => {
+    setSelectedDate(info.event.startStr);
+    fetchEntryByDate(info.event.startStr);
+  };
 
-    const handleScan = () => {
-        setShowCamera(true);
-        // Simulate camera opening
-        setTimeout(() => {
-            setShowCamera(false);
-            alert('Scan complete! Analysis saved.');
-        }, 2000);
-    };
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    router.push('/');
+  };
 
-    return (
-        <>
-            <Head>
-                <title>Calendar & Tracker - SkinCare AI</title>
-            </Head>
+  return (
+    <>
+      <Head>
+        <title>Skin Care Tracker - Dashboard</title>
+      </Head>
 
-            <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-100">
-                {/* Header */}
-                <header className="bg-white shadow-sm sticky top-0 z-10">
-                    <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                            <button
-                                onClick={() => router.push('/home')}
-                                className="mr-4 p-2 hover:bg-gray-100 rounded-lg"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            <h1 className="text-2xl font-bold text-gray-900">Tracker</h1>
-                        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-900">Skin Care Tracker</h1>
+            <button
+              onClick={handleLogout}
+              className="text-gray-600 hover:text-gray-900 font-medium"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
 
-                        <button
-                            onClick={handleScan}
-                            className="px-4 py-2 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 flex items-center gap-2"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Scan Face
-                        </button>
-                    </div>
-                </header>
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Calendar */}
+          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={events}
+              dateClick={handleDateClick}
+              eventClick={handleEventClick}
+              height="auto"
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth'
+              }}
+              eventDisplay="block"
+              dayMaxEvents={true}
+              eventTimeFormat={{
+                hour: 'numeric',
+                minute: '2-digit',
+                meridiem: 'short'
+              }}
+            />
+          </div>
 
-                <main className="max-w-7xl mx-auto px-4 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Calendar */}
-                        <div className="lg:col-span-2">
-                            <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-900">February 2024</h2>
-                                    <div className="flex gap-2">
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                            </svg>
-                                        </button>
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Calendar Grid */}
-                                <div className="grid grid-cols-7 gap-2">
-                                    {/* Day headers */}
-                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                                        <div key={day} className="text-center font-semibold text-gray-600 text-sm py-2">
-                                            {day}
-                                        </div>
-                                    ))}
-
-                                    {/* Calendar days */}
-                                    {Array.from({ length: 35 }, (_, i) => {
-                                        const day = i - 2; // Start from day 1
-                                        const dateStr = day > 0 && day <= 29 ? `2024-02-${String(day).padStart(2, '0')}` : null;
-                                        const data = dateStr ? calendarData[dateStr] : null;
-
-                                        return (
-                                            <button
-                                                key={i}
-                                                onClick={() => dateStr && setSelectedDate(dateStr)}
-                                                disabled={!dateStr || day > 7}
-                                                className={`aspect-square rounded-lg p-2 text-center transition-all ${dateStr && day <= 7 ? getDayStatus(dateStr) : 'bg-gray-50 text-gray-300'
-                                                    } ${selectedDate === dateStr ? 'ring-2 ring-rose-600 ring-offset-2' : ''} disabled:cursor-not-allowed hover:shadow-md`}
-                                            >
-                                                {day > 0 && day <= 29 && (
-                                                    <>
-                                                        <div className="font-bold text-lg">{day}</div>
-                                                        {data?.photo && (
-                                                            <div className="text-xs mt-1">📸</div>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Legend */}
-                                <div className="mt-6 flex flex-wrap gap-4 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-green-100 border-2 border-green-400 rounded"></div>
-                                        <span className="text-gray-600">Great (85+)</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-blue-100 border-2 border-blue-400 rounded"></div>
-                                        <span className="text-gray-600">Good</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-red-100 border-2 border-red-400 rounded"></div>
-                                        <span className="text-gray-600">Missed</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Smart Reminders */}
-                            <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl p-6 text-white">
-                                <h3 className="text-xl font-bold mb-2">🔔 Smart Reminders</h3>
-                                <p className="text-purple-100 mb-4">Get notified when it's time for your routine</p>
-                                <button className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-purple-50">
-                                    Set Reminders
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Day Details */}
-                        <div className="lg:col-span-1">
-                            {selectedEntry ? (
-                                <div className="space-y-4">
-                                    {/* Overall Score */}
-                                    <div className="bg-white rounded-xl p-6 shadow-sm">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-4">
-                                            {selectedDate && new Date(selectedDate).toLocaleDateString('en-US', {
-                                                month: 'long',
-                                                day: 'numeric',
-                                                year: 'numeric'
-                                            })}
-                                        </h3>
-
-                                        <div className="text-center mb-4">
-                                            <div className="text-5xl font-bold text-gray-900 mb-2">
-                                                {selectedEntry.score}
-                                            </div>
-                                            <p className="text-gray-600">Overall Score</p>
-                                        </div>
-
-                                        {/* Face Photo */}
-                                        {selectedEntry.photo && (
-                                            <div className="bg-gradient-to-br from-rose-100 to-purple-100 rounded-lg h-48 flex items-center justify-center mb-4">
-                                                <div className="text-6xl">😊</div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Analysis */}
-                                    <div className="bg-white rounded-xl p-6 shadow-sm">
-                                        <h4 className="font-bold text-gray-900 mb-4">Skin Analysis</h4>
-                                        <div className="space-y-3">
-                                            {Object.entries(mockAnalysis).filter(([key]) => key !== 'overall' && key !== 'insights').map(([key, value]) => (
-                                                <div key={key}>
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <span className="text-sm text-gray-600 capitalize">{key}</span>
-                                                        <span className="text-sm font-bold text-gray-900">{value.status}</span>
-                                                    </div>
-                                                    <div className="bg-gray-200 rounded-full h-2">
-                                                        <div
-                                                            className="bg-gradient-to-r from-rose-400 to-pink-500 h-2 rounded-full"
-                                                            style={{ width: `${value.score}%` }}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                                            <h5 className="font-semibold text-blue-900 mb-2">Key Insights</h5>
-                                            <ul className="space-y-1">
-                                                {mockAnalysis.insights.map((insight, idx) => (
-                                                    <li key={idx} className="text-sm text-blue-800">• {insight}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    {/* Products Used */}
-                                    <div className="bg-white rounded-xl p-6 shadow-sm">
-                                        <h4 className="font-bold text-gray-900 mb-4">Products Used</h4>
-                                        <div className="space-y-3">
-                                            {mockProducts.map((product, idx) => (
-                                                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                                    <div>
-                                                        <p className="font-medium text-gray-900 text-sm">{product.name}</p>
-                                                        <p className="text-xs text-gray-600">{product.time}</p>
-                                                    </div>
-                                                    <span className="text-xl">✓</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-                                    <div className="text-6xl mb-4">📅</div>
-                                    <p className="text-gray-600">Select a day to view details</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </main>
-
-                {/* Camera Modal */}
-                {showCamera && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4">
-                            <div className="text-center">
-                                <div className="text-6xl mb-4">📸</div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">Scanning...</h3>
-                                <p className="text-gray-600">Analyzing your skin</p>
-                                <div className="mt-4 w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-rose-600 h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Total Entries</div>
+                  <div className="text-3xl font-bold text-indigo-600">
+                    {Object.keys(calendarData).length}
+                  </div>
+                </div>
+                <div className="bg-indigo-100 rounded-full p-3">
+                  <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
             </div>
-        </>
-    );
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">This Month</div>
+                  <div className="text-3xl font-bold text-indigo-600">
+                    {Object.keys(calendarData).filter(date => {
+                      const entryDate = new Date(date);
+                      const now = new Date();
+                      return entryDate.getMonth() === now.getMonth() &&
+                             entryDate.getFullYear() === now.getFullYear();
+                    }).length}
+                  </div>
+                </div>
+                <div className="bg-green-100 rounded-full p-3">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">With Photos</div>
+                  <div className="text-3xl font-bold text-indigo-600">
+                    {Object.values(calendarData).filter(entry => entry.has_image).length}
+                  </div>
+                </div>
+                <div className="bg-purple-100 rounded-full p-3">
+                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-4 bg-white rounded-xl shadow p-4">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-indigo-600 rounded"></div>
+                <span className="text-sm text-gray-600">Entry with photo</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-indigo-400 rounded"></div>
+                <span className="text-sm text-gray-600">Entry without photo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Entry Modal */}
+        {showEntryModal && (
+          <EntryModal
+            dateStr={selectedDate}
+            entry={selectedEntry}
+            onClose={() => {
+              setShowEntryModal(false);
+              setSelectedDate(null);
+              setSelectedEntry(null);
+            }}
+            onSave={() => {
+              fetchCalendarData();
+              setShowEntryModal(false);
+              setSelectedDate(null);
+              setSelectedEntry(null);
+            }}
+          />
+        )}
+      </div>
+
+      <style jsx global>{`
+        .fc {
+          font-family: inherit;
+        }
+        .fc-toolbar-title {
+          font-size: 1.5rem !important;
+          font-weight: 700 !important;
+          color: #111827;
+        }
+        .fc-button {
+          background-color: #4F46E5 !important;
+          border-color: #4F46E5 !important;
+          text-transform: capitalize !important;
+        }
+        .fc-button:hover {
+          background-color: #4338CA !important;
+          border-color: #4338CA !important;
+        }
+        .fc-button-active {
+          background-color: #3730A3 !important;
+          border-color: #3730A3 !important;
+        }
+        .fc-day-today {
+          background-color: #EEF2FF !important;
+        }
+        .fc-event {
+          cursor: pointer;
+          border-radius: 4px;
+          padding: 2px 4px;
+          font-size: 0.875rem;
+        }
+        .fc-daygrid-day-number {
+          color: #374151;
+          font-weight: 500;
+          padding: 4px;
+        }
+        .fc-daygrid-day:hover {
+          background-color: #F9FAFB;
+          cursor: pointer;
+        }
+      `}</style>
+    </>
+  );
+}
+
+// Entry Modal Component (same as before)
+function EntryModal({ dateStr, entry, onClose, onSave }) {
+  const [notes, setNotes] = useState(entry?.notes || '');
+  const [skinCondition, setSkinCondition] = useState(entry?.skin_condition || '');
+  const [products, setProducts] = useState(entry?.products || []);
+  const [newProduct, setNewProduct] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const skinConditions = ['Clear', 'Oily', 'Dry', 'Combination', 'Acne', 'Sensitive', 'Normal'];
+
+  useEffect(() => {
+    if (selectedFile) {
+      const url = URL.createObjectURL(selectedFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [selectedFile]);
+
+  const handleAddProduct = () => {
+    if (newProduct.trim()) {
+      setProducts([...products, { product_name: newProduct, product_type: null, time_of_day: null }]);
+      setNewProduct('');
+    }
+  };
+
+  const handleRemoveProduct = (index) => {
+    setProducts(products.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem('access_token');
+    
+    try {
+      const payload = {
+        date: dateStr,
+        notes,
+        skin_condition: skinCondition,
+        products,
+      };
+
+      let response;
+      if (entry) {
+        response = await fetch(`http://localhost:8000/skincare/entries/${entry.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        response = await fetch('http://localhost:8000/skincare/entries', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      if (response.ok) {
+        const savedEntry = await response.json();
+        
+        if (selectedFile) {
+          const formData = new FormData();
+          formData.append('file', selectedFile);
+          
+          await fetch(`http://localhost:8000/skincare/entries/${savedEntry.id}/upload-image`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+        }
+        
+        onSave();
+      }
+    } catch (error) {
+      console.error('Error saving entry:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formattedDate = new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          {/* Modal Header */}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">{formattedDate}</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📷 Upload Photo
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setSelectedFile(e.target.files[0])}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              />
+              {(previewUrl || entry?.image_path) && (
+                <img
+                  src={previewUrl || `http://localhost:8000/${entry.image_path}`}
+                  alt="Preview"
+                  className="mt-3 rounded-lg max-h-64 w-full object-cover"
+                />
+              )}
+            </div>
+
+            {/* Skin Condition */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Skin Condition
+              </label>
+              <select
+                value={skinCondition}
+                onChange={(e) => setSkinCondition(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Select condition...</option>
+                {skinConditions.map((condition) => (
+                  <option key={condition} value={condition}>{condition}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Products */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Products Used
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={newProduct}
+                  onChange={(e) => setNewProduct(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddProduct()}
+                  placeholder="Add product..."
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+                <button
+                  onClick={handleAddProduct}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="space-y-2">
+                {products.map((product, index) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                    <span className="text-gray-900">{product.product_name}</span>
+                    <button
+                      onClick={() => handleRemoveProduct(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Notes
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                placeholder="How is your skin feeling today? Any changes or concerns?"
+              />
+            </div>
+
+            {entry?.analysis_result && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🤖 AI Analysis
+                </label>
+                <div className="bg-indigo-50 p-4 rounded-lg">
+                  <p className="text-gray-900">{entry.analysis_result}</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Modal Footer */}
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={isLoading}
+              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {isLoading ? 'Saving...' : 'Save Entry'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
