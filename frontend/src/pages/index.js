@@ -22,11 +22,11 @@ export default function Home() {
 
       <div className="flex h-screen w-full bg-gradient-to-br from-white to-pink-300">
         {/* 3/10 Width Box */}
-       <div className="w-3/10 border-r border-purple-200 flex flex-col p-8 flex-start space-y-8">
+       <div className="w-3/10 border-r-3 border-purple-200 flex flex-col p-8 flex-start space-y-8">
         
         {/* TOP: Title & Tagline */}
         <div className="justify-center items-center text-center">
-          <div className="border-4 border-purple-200 p-4 flex align-items-center justify-center">
+          <div className="border-2 border-purple-200 p-4 flex align-items-center justify-center">
             <h1 className="text-3xl font-bold text-slate-900">Title</h1>
           </div>
           <p className="text-slate-500 mt-2">Tagline</p>
