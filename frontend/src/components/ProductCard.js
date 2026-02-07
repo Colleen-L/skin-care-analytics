@@ -1,7 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { usePayment } from '@/hooks/usePayment';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { savePurchase, createPurchaseRecord } from '@/services/purchaseLogger';
 import { debounce } from '@/utils/debounce';
 import { showError, showSuccess } from '@/components/Notification';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -10,8 +8,6 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
     const [imageError, setImageError] = useState(false);
     const [buttonState, setButtonState] = useState('default'); // 'default' | 'loading' | 'success' | 'error'
     const [isProcessing, setIsProcessing] = useState(false);
-    const { publicKey } = useWallet();
-    const purchaseRef = useRef(null);
     
     const {
         processPurchase,
@@ -40,17 +36,7 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
                 const result = await processPurchase(product);
 
                 if (result.success) {
-                    // Log purchase
-                    const purchase = createPurchaseRecord({
-                        product,
-                        transactionSignature: result.signature,
-                        explorerUrl: result.explorerUrl,
-                        walletAddress: publicKey?.toString() || 'unknown',
-                        status: result.confirmed ? 'confirmed' : 'pending',
-                    });
-                    savePurchase(purchase);
-
-                    // Show success state
+                    // Show success state (session history handled by parent)
                     setButtonState('success');
                     showSuccess('Purchase successful!', null, 3000);
 
@@ -85,7 +71,7 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
                 }, 5000);
             }
         }, 300),
-        [product, isProcessing, loading, processPurchase, publicKey, onPurchaseSuccess, error, reset]
+        [product, isProcessing, loading, processPurchase, onPurchaseSuccess, error, reset]
     );
 
     const handlePurchase = () => {

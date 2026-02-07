@@ -3,13 +3,13 @@ import Head from 'next/head';
 import products from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import ProductDetailModal from '@/components/ProductDetailModal';
-import PurchaseHistory from '@/components/PurchaseHistory';
 import WalletConnectButton from '@/components/WalletConnectButton';
 import NotificationContainer from '@/components/Notification';
 
 export default function Products() {
     const [filter, setFilter] = useState('all');
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [sessionPurchases, setSessionPurchases] = useState([]);
 
     const categories = [
         { id: 'all', name: 'All Products', icon: '✨' },
@@ -23,14 +23,21 @@ export default function Products() {
         ? products
         : products.filter(p => p.category === filter);
 
-    // Handle purchase success callback
+    // Handle purchase success - add to session-only state (no storage)
     const handlePurchaseSuccess = (result) => {
-        // Close modal if open
-        if (selectedProduct) {
-            setSelectedProduct(null);
-        }
+        if (selectedProduct) setSelectedProduct(null);
 
-        // Show success message
+        const purchase = {
+            id: Date.now(),
+            productName: result.product.name,
+            productBrand: result.product.brand,
+            solanaAmount: result.product.solana,
+            signature: result.signature,
+            explorerUrl: result.explorerUrl,
+            timestamp: new Date().toISOString(),
+        };
+        setSessionPurchases((prev) => [purchase, ...prev]);
+
         if (result.status === 'confirmed') {
             alert(`Purchase successful! Transaction: ${result.signature.substring(0, 8)}...`);
         } else {
@@ -97,8 +104,32 @@ export default function Products() {
                         ))}
                     </div>
 
-                    {/* Purchase History */}
-                    <PurchaseHistory />
+                    {/* Session-only purchase history (clears on refresh) */}
+                    {sessionPurchases.length > 0 && (
+                        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Recent Purchases</h2>
+                            <p className="text-sm text-gray-500 mb-4">Session only — will clear on refresh</p>
+                            <div className="space-y-3">
+                                {sessionPurchases.map((p) => (
+                                    <div key={p.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">{p.productName}</h3>
+                                            <p className="text-sm text-gray-600">{p.productBrand} · {p.solanaAmount} SOL</p>
+                                            <p className="text-xs text-gray-400">{new Date(p.timestamp).toLocaleString()}</p>
+                                        </div>
+                                        <a
+                                            href={p.explorerUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-200"
+                                        >
+                                            View on Explorer
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Product Detail Modal */}
                     {selectedProduct && (

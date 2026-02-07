@@ -1,12 +1,9 @@
 import { useState } from 'react';
 import { usePayment } from '@/hooks/usePayment';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { savePurchase, createPurchaseRecord } from '@/services/purchaseLogger';
 
 export default function ProductDetailModal({ product, onClose, onPurchaseSuccess }) {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
-    const { publicKey } = useWallet();
 
     const {
         processPurchase,
@@ -28,16 +25,6 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
             const result = await processPurchase(product);
 
             if (result.success) {
-                // Log purchase
-                const purchase = createPurchaseRecord({
-                    product,
-                    transactionSignature: result.signature,
-                    explorerUrl: result.explorerUrl,
-                    walletAddress: publicKey?.toString() || 'unknown',
-                    status: result.confirmed ? 'confirmed' : 'pending',
-                });
-                savePurchase(purchase);
-
                 setShowSuccess(true);
                 setTimeout(() => {
                     setShowSuccess(false);
