@@ -20,13 +20,13 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="flex h-screen w-full bg-gradient-to-br from-white to-pink-300">
+      <div className="flex h-screen w-full bg-linear-to-r from-pink-200 to-fuchsia-50">
         {/* 3/10 Width Box */}
-       <div className="w-3/10 border-r-3 border-purple-200 flex flex-col p-8 flex-start space-y-8">
+       <div className="w-3/10 mx-5 border-r-3 border-purple-300 flex flex-col p-8 flex-start space-y-8 opacity-75">
         
         {/* TOP: Title & Tagline */}
         <div className="justify-center items-center text-center">
-          <div className="border-2 border-purple-200 p-4 flex align-items-center justify-center">
+          <div className="border-b-2 border-purple-300 p-4 flex align-items-center justify-center">
             <h1 className="text-3xl font-bold text-slate-900">Title</h1>
           </div>
           <p className="text-slate-500 mt-2">Tagline</p>
@@ -43,7 +43,7 @@ export default function Home() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
               <input 
                 type="text" 
-                className="w-full px-4 py-2 my-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full text-slate-500 placeholder-slate-500 px-4 py-2 my-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 placeholder="Enter username"
               />
             </div>
@@ -51,7 +51,7 @@ export default function Home() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
               <input 
                 type="password" 
-                className="w-full px-4 py-2 my-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                className="w-full text-slate-500 placeholder-slate-500 px-4 py-2 my-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -59,6 +59,9 @@ export default function Home() {
               Submit
             </button>
           </form>
+          <div className="flex align-items-end justify-end">
+            <p className="text-slate-600 mt-2">Sign Up</p>
+          </div>
           </div>
         </div>
 
