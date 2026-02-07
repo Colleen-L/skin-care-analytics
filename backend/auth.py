@@ -54,7 +54,8 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already taken")
 
     # hash password
-    hashed_password = pwd_context.hash(user.password)
+    password_bytes = user.password.encode('utf-8')[:72]
+    hashed_password = pwd_context.hash(password_bytes.decode('utf-8'))
 
     # create user with verification token
     verification_token = secrets.token_urlsafe(32)

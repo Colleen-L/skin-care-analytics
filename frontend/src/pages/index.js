@@ -1,15 +1,15 @@
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Head from 'next/head';
 
 export default function Home() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleLogin = () => {
+  
+  const handleLogin = async () => {
     setIsLoading(true);
-    // Add your login logic here
-    // Example: redirect to auth provider or login page
-    console.log('Login clicked');
-    setTimeout(() => setIsLoading(false), 1000);
+    await router.push('/auth/login');
+    // Loading state will naturally reset when page changes
   };
 
   return (
@@ -19,32 +19,21 @@ export default function Home() {
         <meta name="description" content="Your product tagline" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
         <div className="max-w-4xl w-full">
-          {/* Main Content Card */}
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-            {/* Header Section */}
             <div className="text-center mb-8">
-              {/* Product Name */}
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
                 Your Product Name
               </h1>
-
-              {/* Tagline */}
               <p className="text-xl md:text-2xl text-indigo-600 font-medium mb-6">
                 Your compelling tagline goes here
               </p>
-
-              {/* Summary */}
               <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
                 This is a brief summary of your webapp. Explain what makes your
                 product unique and how it helps your users solve their problems.
-                Keep it concise and engaging.
               </p>
             </div>
-
-            {/* Login/Signup Button */}
             <div className="flex justify-center mb-6">
               <button
                 onClick={handleLogin}
@@ -64,8 +53,6 @@ export default function Home() {
                 )}
               </button>
             </div>
-
-            {/* Mobile App Notice */}
             <div className="text-center">
               <div className="inline-flex items-center bg-indigo-50 text-indigo-700 px-6 py-3 rounded-full">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,8 +62,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* Footer */}
           <div className="text-center mt-8 text-gray-600">
             <p className="text-sm">
               © 2024 Your Product Name. All rights reserved.
