@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const router = useRouter();
   const [userName, setUserName] = useState('User');
-  const [heroImgError, setHeroImgError] = useState(false);
 
   useEffect(() => {
     const profile = localStorage.getItem('skinProfile');
@@ -29,6 +28,7 @@ export default function Home() {
     {
       id: 'analysis',
       title: 'Analysis',
+      gif: '/Analysis.gif',
       gradient: 'from-[#E8D4F0] to-[#D8C4E8]',
       shadow: 'shadow-[0_3px_10px_rgba(216,196,232,0.35)]',
       route: '/features/analytics',
@@ -36,6 +36,7 @@ export default function Home() {
     {
       id: 'products',
       title: 'Recommended Products',
+      gif: '/Commerce.gif',
       gradient: 'from-[#B8E6D4] to-[#A8D5C4]',
       shadow: 'shadow-[0_3px_10px_rgba(168,213,196,0.35)]',
       route: '/features/products',
@@ -43,6 +44,7 @@ export default function Home() {
     {
       id: 'calendar',
       title: 'Calendar',
+      gif: '/Calendar.gif',
       gradient: 'from-[#B8C6E6] to-[#A8B5D5]',
       shadow: 'shadow-[0_3px_10px_rgba(168,181,213,0.35)]',
       route: '/features/calendar',
@@ -56,36 +58,26 @@ export default function Home() {
       </Head>
 
       <div
-        className="min-h-screen flex flex-col"
+        className="h-screen flex flex-col overflow-hidden"
         style={{
           background: 'linear-gradient(135deg, #fef6fa 0%, #ffffff 50%, #fef6fa 100%)',
         }}
       >
         {/* Header */}
-        <header className="relative z-10 px-6 sm:px-8 pt-6 sm:pt-8 pb-3">
+        <header className="relative z-10 flex-shrink-0 px-6 sm:px-8 pt-4 sm:pt-6 pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div
-                className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex-shrink-0 overflow-hidden"
                 style={{
-                  background: '#F5E6DC',
                   border: '2px solid #D4A5B8',
                 }}
               >
-                <svg
-                  className="w-6 h-6"
-                  style={{ color: '#8B4367' }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+                <img
+                  src="/commerce-bg.jpeg"
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h1
                 className="text-2xl font-bold"
@@ -104,64 +96,57 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Main content */}
-        <main className="relative z-10 flex-1 flex justify-center px-6 sm:px-8 pb-8 sm:pb-10">
-          <div className="flex w-full max-w-5xl mx-auto">
-            {/* Left 40% - Hero image */}
-            <div
-              className="hidden md:flex flex-1 max-w-[40%] items-center justify-center pr-3 lg:pr-4"
-              style={{ minHeight: 360 }}
-            >
-              <div
-                className="w-full aspect-[3/4] max-h-[380px] rounded-2xl overflow-hidden flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(180deg, rgba(254,246,250,0.8) 0%, rgba(255,255,255,0.6) 100%)',
-                  border: '2px solid #E8D4DC',
-                }}
-              >
-                {/* Add your image to frontend/public/images/hero.jpg (or .png) */}
-                {!heroImgError ? (
-                  <img
-                    src="/images/hero.jpg"
-                    alt="Skin care"
-                    className="w-full h-full object-cover"
-                    onError={() => setHeroImgError(true)}
-                  />
-                ) : (
-                  <span
-                    className="text-sm font-medium opacity-60"
-                    style={{ color: '#8B4367' }}
-                  >
-                    Hero image
-                  </span>
-                )}
-              </div>
-            </div>
+        {/* Main content - 50/50 split */}
+        <main className="relative z-10 flex-1 min-h-0 flex flex-col sm:flex-row overflow-hidden px-4 sm:px-6 pb-4 gap-3 sm:gap-4">
+          {/* Image section - half */}
+          <div
+            className="flex-1 min-w-0 min-h-0 rounded-xl overflow-hidden flex items-center justify-center"
+            style={{
+              border: '1px solid #E8D4DC',
+              boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
+            }}
+          >
+            <img
+              src="/home.jpeg"
+              alt="Skin care"
+              className="w-full h-full object-contain"
+            />
+          </div>
 
-            {/* Right 60% - Buttons */}
-            <div className="flex-1 md:min-w-[60%] flex flex-col justify-center items-center gap-6 py-4">
+          {/* Buttons section - half */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center items-center gap-5 sm:gap-6">
             {buttons.map((btn) => (
-              <button
+              <div
                 key={btn.id}
                 onClick={() => router.push(btn.route)}
-                className={`
-                  w-1/2 min-w-[140px] md:w-[44%]
-                  h-[80px]
-                  rounded-xl
-                  bg-gradient-to-br ${btn.gradient}
-                  ${btn.shadow}
-                  hover:scale-[1.02] hover:shadow-lg
-                  active:scale-[0.98]
-                  transition-all duration-200 ease-out
-                  flex items-center justify-center
-                `}
+                className="flex items-center justify-center gap-3 cursor-pointer group"
               >
-                <span className="text-white text-base font-bold tracking-tight drop-shadow-sm">
-                  {btn.title}
-                </span>
-              </button>
+                <img
+                  src={btn.gif}
+                  alt=""
+                  className="w-32 h-32 sm:w-40 sm:h-40 object-contain flex-shrink-0 animate-float"
+                />
+                <button
+                  type="button"
+                  className={`
+                    max-w-[280px]
+                    h-[64px] sm:h-[72px]
+                    px-6 sm:px-8
+                    rounded-xl
+                    bg-gradient-to-br ${btn.gradient}
+                    ${btn.shadow}
+                    group-hover:scale-[1.02] group-hover:shadow-lg
+                    active:scale-[0.98]
+                    transition-all duration-200 ease-out
+                    flex items-center justify-center
+                  `}
+                >
+                  <span className="text-white text-base sm:text-lg font-bold tracking-tight drop-shadow-sm text-center">
+                    {btn.title}
+                  </span>
+                </button>
+              </div>
             ))}
-            </div>
           </div>
         </main>
       </div>

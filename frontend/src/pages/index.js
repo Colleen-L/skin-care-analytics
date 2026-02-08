@@ -122,8 +122,8 @@ export default function Home() {
 
               {/* Header */}
               <div className="text-center">
-                <h1 className="text-3xl text-white font-bold">SkinTel</h1>
-                <h3 className="text-white mt-1">
+                <h1 className="text-4xl text-white font-bold">SkinTel</h1>
+                <h3 className="text-lg text-white mt-1">
                   Intelligence for your skin.
                 </h3>
                 <br></br>
@@ -309,12 +309,12 @@ export default function Home() {
               </div>
 
               <div className="mt-8 max-w-sm bg-white/30 backdrop-blur-lg rounded-2xl p-6">
-                <h2 className="text-md text-white font-bold">About Us</h2>
+                <h2 className="text-lg text-white font-bold">About Us</h2>
                 <hr></hr>
-                <p className="text-sm text-white leading-relaxed mt-4 mb-">
+                <p className="text-base text-white leading-relaxed mt-4 mb-">
                   SkinTel is your personal skincare assistant. Track your routines, analyze products, and understand your skin like never before. Our AI-driven insights help you achieve healthy, glowing skin efficiently.
                 </p>
-                <p className="text-sm text-white">
+                <p className="text-base text-white">
                   Join our community and make informed choices about your skincare products, routines, and goals. Intelligence for your skin, powered by data and science.
                 </p>
               </div>

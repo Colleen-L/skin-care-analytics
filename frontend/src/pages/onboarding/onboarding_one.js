@@ -89,12 +89,22 @@ export default function Onboarding() {
             <div className="min-h-screen flex flex-col" style={{ background: '#fef2f9' }}>
                 {/* Header - Pastel layout */}
                 <header
-                    className="flex-shrink-0 border-b px-4 sm:px-6 py-4 flex items-center"
+                    className="flex-shrink-0 border-b px-4 sm:px-6 py-4 flex items-center gap-3"
                     style={{
                         background: 'rgba(255,255,255,0.9)',
                         borderColor: '#E8D4DC',
                     }}
                 >
+                    <div
+                        className="flex-shrink-0 w-[58px] h-[58px] rounded-full overflow-hidden"
+                        style={{ border: '2px solid #D4A5B8' }}
+                    >
+                        <img
+                            src="/commerce-bg.jpeg"
+                            alt=""
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
                     <h1 className="text-xl font-bold" style={{ color: '#8B4367' }}>Onboarding</h1>
                 </header>
 
@@ -240,13 +250,14 @@ export default function Onboarding() {
 
                     {/* Step 5: Loading */}
                     {step === 5 && (
-                        <div className="text-center py-16">
+                        <div className="text-center py-16 flex flex-col items-center">
                             <p className="text-lg font-medium mb-6" style={{ color: '#8B4367' }}>
                                 Constructing profile for optimized skincare routine......
                             </p>
-                            <div
-                                className="w-28 h-28 mx-auto rounded-2xl animate-pulse"
-                                style={{ background: 'linear-gradient(135deg, #F0E4E8 0%, #E8DCE0 100%)', border: '1px solid #E8D4DC' }}
+                            <img
+                                src="/Routine.gif"
+                                alt=""
+                                className="w-40 h-40 sm:w-48 sm:h-48 object-contain mx-auto"
                             />
                         </div>
                     )}

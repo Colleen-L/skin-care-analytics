@@ -36,6 +36,15 @@ body {
   animation: shake 0.5s ease-in-out;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.02); }
+}
+
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   /* Mobile: 1 column */
