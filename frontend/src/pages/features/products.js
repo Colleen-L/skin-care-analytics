@@ -14,6 +14,7 @@ export default function Products() {
     const [sessionPurchases, setSessionPurchases] = useState([]);
     const [profileSummary, setProfileSummary] = useState('');
     const [profileImageUrl, setProfileImageUrl] = useState(null);
+    const [userName, setUserName] = useState('');
 
     const categories = [
         { id: 'all', name: 'All Products', icon: '✨' },
@@ -46,6 +47,34 @@ export default function Products() {
         } catch (_) {
             setProfileSummary('Personalized');
         }
+    }, []);
+
+    // Fetch username from backend
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('access_token');
+            
+            if (!token) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8000/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    setUserName(userData.username);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        fetchUserData();
     }, []);
 
     // Handle purchase success - add to session-only state (no storage)
@@ -121,10 +150,10 @@ export default function Products() {
                             </div>
                             <div className="min-w-0">
                                 <p className="text-lg font-semibold truncate" style={{ color: '#8B4367' }}>
-                                    Based on profile
+                                    {userName ? `${userName}'s recommendations` : 'Your Recommendations'}
                                 </p>
                                 <p className="text-base truncate" style={{ color: '#A67B8B' }}>
-                                    {profileSummary}
+                                    Based on: {profileSummary}
                                 </p>
                             </div>
                         </div>

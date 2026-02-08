@@ -131,7 +131,7 @@ export default function Dashboard() {
           </div> */}
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div
               className="rounded-xl p-6"
               style={{
@@ -234,29 +234,6 @@ export default function Dashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
                   </svg>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div
-            className="mt-4 rounded-xl p-4"
-            style={{
-              background: 'rgba(255,255,255,0.8)',
-              border: '1px solid #E8D4DC',
-              boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
-            }}
-          >
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded" style={{ background: '#B8C6E6' }}></div>
-                <span className="text-sm" style={{ color: '#8B4367' }}>Skincare entry logged</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5" style={{ color: '#D97F3E' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                </svg>
-                <span className="text-sm" style={{ color: '#8B4367' }}>Keep your streak going!</span>
               </div>
             </div>
           </div>

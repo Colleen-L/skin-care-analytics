@@ -82,7 +82,25 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.detail || 'Signup failed');
+        // Handle different error formats from FastAPI
+        let errorMessage = 'Signup failed';
+        
+        if (data.detail) {
+          if (typeof data.detail === 'string') {
+            // Simple string error
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.detail)) {
+            // Pydantic validation errors (array of error objects)
+            errorMessage = data.detail.map(err => {
+              // Extract just the message part
+              if (typeof err === 'string') return err;
+              if (err.msg) return err.msg;
+              return 'Validation error';
+            }).join('. ');
+          }
+        }
+        
+        setError(errorMessage);
         setIsLoading(false);
         return;
       }
@@ -90,7 +108,16 @@ export default function Home() {
       setSuccessMessage('Account created! You can now log in.');
       setIsLogin(true);
       setIsLoading(false);
-    } catch {
+      
+      // Clear signup form
+      setSignupData({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
+    } catch (err) {
+      console.error('Signup error:', err);
       setError('Cannot connect to backend (localhost:8000)');
       setIsLoading(false);
     }
@@ -154,6 +181,7 @@ export default function Home() {
                       setLoginData({ ...loginData, username_or_email: e.target.value })
                     }
                     className="w-full px-4 py-3 border text-white rounded-lg"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                     required
                   />
 
@@ -166,12 +194,13 @@ export default function Home() {
                         setLoginData({ ...loginData, password: e.target.value })
                       }
                       className="w-full px-4 py-3 border text-white rounded-lg pr-12"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute text-white right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute text-white right-3 top-1/2 -translate-y-1/2 hover:text-pink-200"
                     >
                       {showPassword ? (
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -189,7 +218,7 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90"
+                    className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
                   >
                     {isLoading ? 'Logging in...' : 'Login'}
                   </button>
@@ -207,6 +236,7 @@ export default function Home() {
                       setSignupData({ ...signupData, username: e.target.value })
                     }
                     className="w-full text-white px-4 py-3 border rounded-lg"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                     required
                   />
 
@@ -218,24 +248,26 @@ export default function Home() {
                       setSignupData({ ...signupData, email: e.target.value })
                     }
                     className="w-full text-white px-4 py-3 border rounded-lg"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                     required
                   />
 
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Password"
+                      placeholder="Password (8+ chars, uppercase, number, special)"
                       value={signupData.password}
                       onChange={(e) =>
                         setSignupData({ ...signupData, password: e.target.value })
                       }
                       className="w-full text-white px-4 py-3 border rounded-lg pr-12"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute text-white right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute text-white right-3 top-1/2 -translate-y-1/2 hover:text-pink-200"
                     >
                       {showPassword ? (
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -262,12 +294,13 @@ export default function Home() {
                         })
                       }
                       className="w-full text-white px-4 py-3 border rounded-lg pr-12"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute text-white right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute text-white right-3 top-1/2 -translate-y-1/2 hover:text-pink-200"
                     >
                       {showPassword ? (
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -285,7 +318,7 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90"
+                    className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
                   >
                     {isLoading ? 'Creating...' : 'Sign Up'}
                   </button>
@@ -320,11 +353,6 @@ export default function Home() {
               </div>
 
             </div>
-
-
-            
-
-            
           </div>
 
           {/* RIGHT 2/3 CONTENT */}
