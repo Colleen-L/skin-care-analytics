@@ -18,6 +18,12 @@ export default function Home() {
     } catch (_) {}
   }, [router]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('skinProfile');
+    router.push('/');
+  };
+
   const buttons = [
     {
       id: 'analysis',
@@ -40,13 +46,6 @@ export default function Home() {
       shadow: 'shadow-[0_3px_10px_rgba(168,181,213,0.35)]',
       route: '/features/calendar',
     },
-    {
-      id: 'routine',
-      title: 'Routine Builder',
-      gradient: 'from-[#F0D8D0] to-[#E8D0C8]',
-      shadow: 'shadow-[0_3px_10px_rgba(232,208,200,0.35)]',
-      route: '/features/routine',
-    },
   ];
 
   return (
@@ -63,35 +62,44 @@ export default function Home() {
       >
         {/* Header */}
         <header className="relative z-10 px-6 sm:px-8 pt-6 sm:pt-8 pb-3">
-          <div className="flex items-center gap-4">
-            <div
-              className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
-              style={{
-                background: '#F5E6DC',
-                border: '2px solid #D4A5B8',
-              }}
-            >
-              <svg
-                className="w-6 h-6"
-                style={{ color: '#8B4367' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div
+                className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
+                style={{
+                  background: '#F5E6DC',
+                  border: '2px solid #D4A5B8',
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+                <svg
+                  className="w-6 h-6"
+                  style={{ color: '#8B4367' }}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </div>
+              <h1
+                className="text-2xl font-bold"
+                style={{ color: '#8B4367' }}
+              >
+                Welcome back{userName !== 'User' ? `, ${userName}` : ''}!
+              </h1>
             </div>
-            <h1
-              className="text-2xl font-bold"
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-xl font-semibold transition-colors"
               style={{ color: '#8B4367' }}
             >
-              Welcome back{userName !== 'User' ? `, ${userName}` : ''}!
-            </h1>
+              Logout
+            </button>
           </div>
         </header>
 

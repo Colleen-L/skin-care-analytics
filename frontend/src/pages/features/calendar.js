@@ -14,11 +14,6 @@ export default function Dashboard() {
   const [calendarData, setCalendarData] = useState({});
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
     fetchCalendarData();
   }, []);
 
@@ -33,13 +28,13 @@ export default function Dashboard() {
       const data = await response.json();
       setCalendarData(data);
       
-      // Convert to FullCalendar events format
+      // Convert to FullCalendar events format (pastel colors)
       const calendarEvents = Object.entries(data).map(([date, entry]) => ({
         id: entry.id,
         title: `${entry.skin_condition || 'Entry'} ${entry.has_image ? '📷' : ''}`,
         date: date,
-        backgroundColor: entry.has_image ? '#4F46E5' : '#818CF8',
-        borderColor: entry.has_image ? '#4338CA' : '#6366F1',
+        backgroundColor: entry.has_image ? '#D4A5B8' : '#B8C6E6',
+        borderColor: entry.has_image ? '#C495A8' : '#A8B5D5',
         extendedProps: {
           ...entry
         }
@@ -90,35 +85,41 @@ export default function Dashboard() {
     fetchEntryByDate(info.event.startStr); // Then fetch data
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    router.push('/');
-  };
-
   return (
     <>
       <Head>
         <title>Skin Care Tracker - Dashboard</title>
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {/* Header */}
-        <div className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Skin Care Tracker</h1>
-            <div className="flex gap-4 items-center">
-              <button
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900 font-medium"
-              >
-                Logout
-              </button>
-            </div>
+      <div className="min-h-screen" style={{ background: '#fef2f9' }}>
+        {/* Header - Match products page style */}
+        <header
+          className="sticky top-0 z-10 border-b"
+          style={{
+            background: 'rgba(255,255,255,0.9)',
+            borderColor: '#E8D4DC',
+          }}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
+            <button
+              onClick={() => router.push('/home')}
+              className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:opacity-80"
+              style={{
+                background: '#F5E6DC',
+                border: '2px solid #D4A5B8',
+                color: '#8B4367',
+              }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <h1 className="text-2xl font-bold" style={{ color: '#8B4367' }}>Skin Care Tracker</h1>
           </div>
-        </div>
+        </header>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           {/* Debug Info
           <div className="bg-yellow-100 border border-yellow-400 rounded p-4 mb-4">
             <p className="text-sm font-mono">
@@ -129,7 +130,14 @@ export default function Dashboard() {
           </div> */}
           
           {/* Calendar */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <div
+            className="rounded-2xl p-6 mb-6"
+            style={{
+              background: 'rgba(255,255,255,0.8)',
+              border: '1px solid #E8D4DC',
+              boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
+            }}
+          >
             <FullCalendar
               plugins={[dayGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
@@ -144,7 +152,7 @@ export default function Dashboard() {
               headerToolbar={{
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth'
+                right: ''
               }}
               eventDisplay="block"
               dayMaxEvents={true}
@@ -158,27 +166,41 @@ export default function Dashboard() {
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl shadow p-6">
+            <div
+              className="rounded-xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.8)',
+                border: '1px solid #E8D4DC',
+                boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+              }}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">Total Entries</div>
-                  <div className="text-3xl font-bold text-indigo-600">
+                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>Total Entries</div>
+                  <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
                     {Object.keys(calendarData).length}
                   </div>
                 </div>
-                <div className="bg-indigo-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="rounded-full p-3" style={{ background: '#F0E4E8' }}>
+                  <svg className="w-8 h-8" style={{ color: '#8B6B7B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow p-6">
+            <div
+              className="rounded-xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.8)',
+                border: '1px solid #E8D4DC',
+                boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+              }}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">This Month</div>
-                  <div className="text-3xl font-bold text-indigo-600">
+                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>This Month</div>
+                  <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
                     {Object.keys(calendarData).filter(date => {
                       const entryDate = new Date(date);
                       const now = new Date();
@@ -187,24 +209,31 @@ export default function Dashboard() {
                     }).length}
                   </div>
                 </div>
-                <div className="bg-green-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="rounded-full p-3" style={{ background: '#D4E8D4' }}>
+                  <svg className="w-8 h-8" style={{ color: '#5A8B5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow p-6">
+            <div
+              className="rounded-xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.8)',
+                border: '1px solid #E8D4DC',
+                boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+              }}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">With Photos</div>
-                  <div className="text-3xl font-bold text-indigo-600">
+                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>With Photos</div>
+                  <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
                     {Object.values(calendarData).filter(entry => entry.has_image).length}
                   </div>
                 </div>
-                <div className="bg-purple-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="rounded-full p-3" style={{ background: '#D4E8F0' }}>
+                  <svg className="w-8 h-8" style={{ color: '#5A8BA8' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
@@ -213,15 +242,22 @@ export default function Dashboard() {
           </div>
 
           {/* Legend */}
-          <div className="mt-4 bg-white rounded-xl shadow p-4">
+          <div
+            className="mt-4 rounded-xl p-4"
+            style={{
+              background: 'rgba(255,255,255,0.8)',
+              border: '1px solid #E8D4DC',
+              boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+            }}
+          >
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-indigo-600 rounded"></div>
-                <span className="text-sm text-gray-600">Entry with photo</span>
+                <div className="w-4 h-4 rounded" style={{ background: '#D4A5B8' }}></div>
+                <span className="text-sm" style={{ color: '#8B4367' }}>Entry with photo</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-indigo-400 rounded"></div>
-                <span className="text-sm text-gray-600">Entry without photo</span>
+                <div className="w-4 h-4 rounded" style={{ background: '#B8C6E6' }}></div>
+                <span className="text-sm" style={{ color: '#8B4367' }}>Entry without photo</span>
               </div>
             </div>
           </div>
@@ -255,32 +291,33 @@ export default function Dashboard() {
         .fc-toolbar-title {
           font-size: 1.5rem !important;
           font-weight: 700 !important;
-          color: #111827;
+          color: #8B4367 !important;
         }
         .fc-button {
-          background-color: #4F46E5 !important;
-          border-color: #4F46E5 !important;
+          background: linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%) !important;
+          border-color: #D4A5B8 !important;
           text-transform: capitalize !important;
+          color: white !important;
         }
         .fc-button:hover {
-          background-color: #4338CA !important;
-          border-color: #4338CA !important;
+          background: linear-gradient(135deg, #C495A8 0%, #B48598 100%) !important;
+          border-color: #C495A8 !important;
         }
         .fc-button-active {
-          background-color: #3730A3 !important;
-          border-color: #3730A3 !important;
+          background: linear-gradient(135deg, #B48598 0%, #A47588 100%) !important;
+          border-color: #B48598 !important;
         }
         .fc-day-today {
-          background-color: #EEF2FF !important;
+          background-color: #F5F0F2 !important;
         }
         .fc-event {
           cursor: pointer;
-          border-radius: 4px;
+          border-radius: 8px;
           padding: 2px 4px;
           font-size: 0.875rem;
         }
         .fc-daygrid-day-number {
-          color: #374151;
+          color: #8B4367;
           font-weight: 500;
           padding: 4px;
         }
@@ -288,7 +325,7 @@ export default function Dashboard() {
           cursor: pointer !important;
         }
         .fc-daygrid-day:hover {
-          background-color: #F9FAFB;
+          background-color: #FDF8FA;
           cursor: pointer;
         }
         .fc-daygrid-day-frame {
@@ -655,15 +692,26 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
   });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ zIndex: 10000 }}>
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999, background: 'rgba(139,67,103,0.15)' }}>
+      <div
+        className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        style={{
+          zIndex: 10000,
+          background: '#fefcfe',
+          border: '1px solid #E8D4DC',
+          boxShadow: '0 8px 32px rgba(212,165,184,0.2)',
+        }}
+      >
         <div className="p-6">
           {/* Modal Header */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-gray-900">{formattedDate}</h2>
+              <h2 className="text-2xl font-bold" style={{ color: '#8B4367' }}>{formattedDate}</h2>
               {localEntry?.id && !isEditMode && (
-                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
+                <span
+                  className="px-3 py-1 text-sm font-medium rounded-full"
+                  style={{ background: '#F0E4E8', color: '#8B6B7B' }}
+                >
                   Saved Entry
                 </span>
               )}
@@ -673,7 +721,8 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                 <>
                   <button
                     onClick={() => setIsEditMode(true)}
-                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    className="p-2 rounded-lg transition-colors"
+                    style={{ color: '#8B4367' }}
                     title="Edit entry"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -682,7 +731,8 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 rounded-lg transition-colors"
+                    style={{ color: '#8B4A4A' }}
                     title="Delete entry"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -691,7 +741,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   </button>
                 </>
               )}
-              <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <button onClick={onClose} style={{ color: '#8B4367' }}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -703,7 +753,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
             {/* Camera Preview or Photo Section - Only in edit mode */}
             {isEditMode && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                   📷 Take Photo for AI Analysis
                 </label>
               
@@ -746,7 +796,8 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                     </button>
                     <button
                       onClick={capturePhoto}
-                      className="px-8 py-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 font-medium shadow-lg"
+                      className="px-8 py-3 text-white rounded-full font-medium shadow-lg"
+                      style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)' }}
                     >
                       📸 Capture
                     </button>
@@ -758,7 +809,8 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                     <button
                       onClick={handleTakePhoto}
                       disabled={isLoading}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                      className="px-4 py-2 text-white rounded-xl disabled:opacity-50"
+                      style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)' }}
                     >
                       {isLoading ? 'Processing...' : 'Take Photo'}
                     </button>
@@ -771,10 +823,10 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                         className="rounded-lg max-h-64 w-full object-cover"
                       />
                       {isLoading && (
-                        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                        <div className="rounded-lg p-4" style={{ background: '#F5F0F2', border: '1px solid #E8D4DC' }}>
                           <div className="flex items-center gap-3">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
-                            <p className="text-sm text-indigo-900">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#D4A5B8' }}></div>
+                            <p className="text-sm" style={{ color: '#8B4367' }}>
                               Analyzing your skin with AI... This may take up to 60 seconds.
                             </p>
                           </div>
@@ -783,7 +835,8 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                       <button
                         onClick={handleTakePhoto}
                         disabled={isLoading}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 w-full"
+                        className="px-4 py-2 text-white rounded-xl disabled:opacity-50 w-full"
+                        style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)' }}
                       >
                         {isLoading ? 'Processing...' : 'Retake Photo'}
                       </button>
@@ -797,14 +850,15 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
 
             {/* Skin Condition */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                 Skin Condition
               </label>
               {isEditMode ? (
                 <select
                   value={skinCondition}
                   onChange={(e) => setSkinCondition(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 rounded-xl"
+                  style={{ border: '1px solid #E8D4DC' }}
                 >
                   <option value="">Select condition...</option>
                   {skinConditions.map((condition) => (
@@ -812,15 +866,15 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   ))}
                 </select>
               ) : (
-                <div className="px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-gray-900">{skinCondition || 'Not specified'}</p>
+                <div className="px-4 py-2 rounded-xl" style={{ background: '#F5F0F2' }}>
+                  <p style={{ color: '#8B4367' }}>{skinCondition || 'Not specified'}</p>
                 </div>
               )}
             </div>
 
             {/* Products */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                 Products Used
               </label>
               {isEditMode ? (
@@ -832,19 +886,21 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                       onChange={(e) => setNewProduct(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleAddProduct()}
                       placeholder="Add product..."
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                      className="flex-1 px-4 py-2 rounded-xl"
+                      style={{ border: '1px solid #E8D4DC' }}
                     />
                     <button
                       onClick={handleAddProduct}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="px-4 py-2 text-white rounded-xl"
+                      style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)' }}
                     >
                       Add
                     </button>
                   </div>
                   <div className="space-y-2">
                     {products.map((product, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                        <span className="text-gray-900">{product.product_name}</span>
+                      <div key={index} className="flex items-center justify-between p-3 rounded-xl" style={{ background: '#F5F0F2' }}>
+                        <span style={{ color: '#8B4367' }}>{product.product_name}</span>
                         <button
                           onClick={() => handleRemoveProduct(index)}
                           className="text-red-500 hover:text-red-700"
@@ -858,13 +914,13 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   </div>
                 </>
               ) : (
-                <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                <div className="px-4 py-3 rounded-xl" style={{ background: '#F5F0F2' }}>
                   {products && products.length > 0 ? (
-                    <p className="text-gray-900">
+                    <p style={{ color: '#8B4367' }}>
                       {products.map(p => p.product_name).join(', ')}
                     </p>
                   ) : (
-                    <p className="text-gray-500 text-sm">No products recorded</p>
+                    <p className="text-sm" style={{ color: '#A67B8B' }}>No products recorded</p>
                   )}
                 </div>
               )}
@@ -872,7 +928,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                 Notes
               </label>
               {isEditMode ? (
@@ -880,35 +936,36 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2 rounded-xl"
+                  style={{ border: '1px solid #E8D4DC' }}
                   placeholder="How is your skin feeling today? Any changes or concerns?"
                 />
               ) : (
-                <div className="px-4 py-3 bg-gray-50 rounded-lg min-h-[100px]">
-                  <p className="text-gray-900 whitespace-pre-wrap">{notes || 'No notes added'}</p>
+                <div className="px-4 py-3 rounded-xl min-h-[100px]" style={{ background: '#F5F0F2' }}>
+                  <p className="whitespace-pre-wrap" style={{ color: '#8B4367' }}>{notes || 'No notes added'}</p>
                 </div>
               )}
             </div>
 
             {localEntry?.analysis_result && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                   🤖 AI Analysis
                 </label>
-                <div className="bg-indigo-50 p-4 rounded-lg">
-                  <p className="text-gray-900">{localEntry.analysis_result}</p>
+                <div className="p-4 rounded-xl" style={{ background: '#F0E4E8' }}>
+                  <p style={{ color: '#8B4367' }}>{localEntry.analysis_result}</p>
                 </div>
               </div>
             )}
             
             {/* Analysis Status Messages */}
             {analysisStatus === 'success' && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <div className="rounded-xl p-3" style={{ background: '#E8F4E8', border: '1px solid #C8E0C8' }}>
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" style={{ color: '#5A8B5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <p className="text-sm text-green-800 font-medium">AI analysis complete!</p>
+                  <p className="text-sm font-medium" style={{ color: '#5A8B5A' }}>AI analysis complete!</p>
                 </div>
               </div>
             )}
@@ -931,14 +988,16 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                       onClose();
                     }
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 rounded-xl"
+                  style={{ border: '1px solid #E8D4DC', color: '#8B4367' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 text-white rounded-xl disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)' }}
                 >
                   {isLoading ? 'Saving...' : 'Save Entry'}
                 </button>
@@ -946,7 +1005,8 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
             ) : (
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="flex-1 px-4 py-2 text-white rounded-xl"
+                style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)' }}
               >
                 Close
               </button>
