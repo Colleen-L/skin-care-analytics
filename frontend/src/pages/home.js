@@ -4,18 +4,43 @@ import { useState, useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
-  const [userName, setUserName] = useState('User');
+  const [userName, setUserName] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const profile = localStorage.getItem('skinProfile');
-    if (!profile) {
-      router.push('/onboarding/onboarding_one');
-      return;
-    }
-    try {
-      const parsed = JSON.parse(profile);
-      if (parsed?.userName) setUserName(parsed.userName);
-    } catch (_) {}
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('access_token');
+      
+      if (!token) {
+        router.push('/');
+        return;
+      }
+
+      try {
+        // Fetch user data from backend
+        const response = await fetch('http://localhost:8000/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setUserName(userData.username);
+        } else {
+          // Token invalid or expired, redirect to login
+          localStorage.removeItem('access_token');
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        router.push('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, [router]);
 
   const handleLogout = () => {
@@ -57,12 +82,20 @@ export default function Home() {
         <title>Home - SkinCare AI</title>
       </Head>
 
-      <div
-        className="h-screen flex flex-col overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #fef6fa 0%, #ffffff 50%, #fef6fa 100%)',
-        }}
-      >
+      {loading ? (
+        <div className="h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #fef6fa 0%, #ffffff 50%, #fef6fa 100%)' }}>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: '#D4A5B8' }}></div>
+            <p style={{ color: '#8B4367' }}>Loading...</p>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="h-screen flex flex-col overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #fef6fa 0%, #ffffff 50%, #fef6fa 100%)',
+          }}
+        >
         {/* Header */}
         <header className="relative z-10 flex-shrink-0 px-6 sm:px-8 pt-4 sm:pt-6 pb-2">
           <div className="flex items-center justify-between">
@@ -83,7 +116,7 @@ export default function Home() {
                 className="text-2xl font-bold"
                 style={{ color: '#8B4367' }}
               >
-                Welcome back{userName !== 'User' ? `, ${userName}` : ''}!
+                Welcome back{userName ? `, ${userName}` : ''}!
               </h1>
             </div>
             <button
@@ -150,6 +183,7 @@ export default function Home() {
           </div>
         </main>
       </div>
+      )}
     </>
   );
 }
