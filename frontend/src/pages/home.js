@@ -7,7 +7,7 @@ export default function Home() {
   const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const [userName, setUserName] = useState('User');
+  // const [userName, setUserName] = useState('User');
   const [hoveredId, setHoveredId] = useState(null);
 
   useEffect(() => {
