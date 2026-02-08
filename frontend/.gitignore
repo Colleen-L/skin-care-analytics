@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python
+venv/
+skin_care_venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+.next/
+.env*
+
+
