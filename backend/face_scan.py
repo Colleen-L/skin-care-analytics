@@ -152,7 +152,7 @@ async def ai_analysis(
                 # Find the entry for this date
                 from models import SkinCareEntry
                 entry = db.query(SkinCareEntry).filter(
-                    SkinCareEntry.user_id == 1,  # TODO: Get from auth
+                    SkinCareEntry.user_id == 2,  # TODO: Get from auth
                     SkinCareEntry.date == entry_date
                 ).first()
                 
@@ -164,7 +164,7 @@ async def ai_analysis(
                     print(f"No entry found for date {date}, creating one...")
                     # Create a new entry with just the analysis
                     new_entry = SkinCareEntry(
-                        user_id=1,  # TODO: Get from auth
+                        user_id=2,  # TODO: Get from auth
                         date=entry_date,
                         analysis_result=formatted_result
                     )

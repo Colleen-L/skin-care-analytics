@@ -60,6 +60,7 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         console.log('Entry found:', data);
+        console.log('Analysis result in fetched data:', data.analysis_result);
         setSelectedEntry(data);
       } else {
         console.log('No entry found for this date');
@@ -356,7 +357,9 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
 
   // Sync state when entry data loads or changes
   useEffect(() => {
+    console.log('Entry prop changed:', entry);
     if (entry) {
+      console.log('Entry has analysis_result:', entry.analysis_result);
       setLocalEntry(entry);
       setNotes(entry.notes || '');
       setSkinCondition(entry.skin_condition || '');
@@ -368,6 +371,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
       // If entry exists and has data, start in view mode
       setIsEditMode(!entry.id);
     } else {
+      console.log('No entry - starting in edit mode');
       // New entry - start in edit mode
       setIsEditMode(true);
     }
@@ -493,29 +497,107 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
       if (response.ok) {
         const data = await response.json();
         console.log("AI analysis result:", data);
-        // Update both local and parent entry state
+        
+        // Update local state immediately
         const updatedEntry = { ...localEntry, analysis_result: data.result };
         setLocalEntry(updatedEntry);
         onUpdateEntry(updatedEntry);
+        
+        // Immediately save the analysis result to backend
+        await saveAnalysisToBackend(data.result, token);
+        
         setAnalysisStatus('success');
         // Clear status after 3 seconds
         setTimeout(() => setAnalysisStatus(''), 3000);
       } else {
         const errorText = await response.text();
         console.error("AI analysis failed:", errorText);
-        // Don't show alert - user can still save their entry
+        setAnalysisStatus('error');
+        setTimeout(() => setAnalysisStatus(''), 3000);
       }
     } catch (err) {
       if (err.name === 'AbortError') {
         console.error("AI analysis timeout");
-        // Don't show alert - user can still save their entry
+        setAnalysisStatus('timeout');
       } else {
         console.error("Error sending to AI:", err);
-        // Don't show alert - user can still save their entry
+        setAnalysisStatus('error');
       }
+      setTimeout(() => setAnalysisStatus(''), 3000);
     } finally {
       setIsLoading(false);
       console.log("AI analysis complete, loading set to false");
+    }
+  };
+
+  const saveAnalysisToBackend = async (analysisResult, token) => {
+    try {
+      console.log("Saving analysis result to backend...");
+      
+      // First check if entry exists
+      let entryId = localEntry?.id;
+      
+      if (!entryId || typeof entryId !== 'number') {
+        // Try to fetch existing entry
+        try {
+          const checkResponse = await fetch(`http://localhost:8000/skincare/entries/${dateStr}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          
+          if (checkResponse.ok) {
+            const existingEntry = await checkResponse.json();
+            entryId = existingEntry.id;
+          }
+        } catch (err) {
+          // Entry doesn't exist yet
+        }
+      }
+      
+      const payload = {
+        date: dateStr,
+        notes: notes || '',
+        skin_condition: skinCondition || null,
+        products: products || [],
+        analysis_result: analysisResult,
+      };
+      
+      let response;
+      
+      if (entryId && typeof entryId === 'number') {
+        // Update existing entry
+        response = await fetch(`http://localhost:8000/skincare/entries/${entryId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // Create new entry
+        response = await fetch('http://localhost:8000/skincare/entries', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+      
+      if (response.ok) {
+        const savedEntry = await response.json();
+        console.log("Analysis saved successfully:", savedEntry);
+        // Update local entry with the saved entry data (including ID if it was newly created)
+        setLocalEntry(savedEntry);
+        onUpdateEntry(savedEntry);
+      } else {
+        console.error("Failed to save analysis:", response.status);
+      }
+    } catch (error) {
+      console.error("Error saving analysis to backend:", error);
     }
   };
 
@@ -580,11 +662,13 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
     const token = localStorage.getItem('access_token');
     
     try {
+      // Include analysis_result in the payload to be saved
       const payload = {
         date: dateStr,
         notes,
         skin_condition: skinCondition,
         products,
+        analysis_result: localEntry?.analysis_result || null,
       };
 
       let savedEntryId = localEntry?.id;
@@ -604,6 +688,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
             savedEntryId = existingEntry.id;
           }
         } catch (err) {
+          // Entry doesn't exist yet, will create below
         }
       }
       
@@ -642,12 +727,10 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
         savedEntryId = savedEntry.id;
       }
 
-      // Upload image if we have one - REMOVED: We don't want to save images anymore
-      
-      // Success - refetch the entry to get updated data with products
+      // Success - refetch the entry to get updated data with products and analysis
       setIsLoading(false);
       
-      // Fetch the updated entry to get all data including products
+      // Fetch the updated entry to get all data including products and analysis_result
       if (savedEntryId) {
         try {
           const refetchResponse = await fetch(`http://localhost:8000/skincare/entries/${dateStr}`, {
@@ -947,13 +1030,14 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
               )}
             </div>
 
+            {/* AI Analysis Result - Always show if available */}
             {localEntry?.analysis_result && (
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                   🤖 AI Analysis
                 </label>
                 <div className="p-4 rounded-xl" style={{ background: '#F0E4E8' }}>
-                  <p style={{ color: '#8B4367' }}>{localEntry.analysis_result}</p>
+                  <p className="whitespace-pre-wrap" style={{ color: '#8B4367' }}>{localEntry.analysis_result}</p>
                 </div>
               </div>
             )}
@@ -965,7 +1049,27 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   <svg className="w-5 h-5" style={{ color: '#5A8B5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <p className="text-sm font-medium" style={{ color: '#5A8B5A' }}>AI analysis complete!</p>
+                  <p className="text-sm font-medium" style={{ color: '#5A8B5A' }}>AI analysis complete! The analysis will be saved with your entry.</p>
+                </div>
+              </div>
+            )}
+            {analysisStatus === 'error' && (
+              <div className="rounded-xl p-3" style={{ background: '#F4E8E8', border: '1px solid #E0C8C8' }}>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" style={{ color: '#8B5A5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <p className="text-sm font-medium" style={{ color: '#8B5A5A' }}>AI analysis failed. You can still save your entry.</p>
+                </div>
+              </div>
+            )}
+            {analysisStatus === 'timeout' && (
+              <div className="rounded-xl p-3" style={{ background: '#F4F0E8', border: '1px solid #E0DCC8' }}>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" style={{ color: '#8B7B5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm font-medium" style={{ color: '#8B7B5A' }}>AI analysis timed out. You can still save your entry.</p>
                 </div>
               </div>
             )}
