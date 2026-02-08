@@ -49,6 +49,7 @@ def extract_text(image_path):
 
     # Use pyspellchecker to correct misspelled words in the extracted text
     spell = SpellChecker(distance=1)
+    spell.word_frequency.load_text_file('./ingredients/ingredient_dictionary.txt')
     active_start = text.find("Active")
     inactive_start = text.find("Inactive")
     
@@ -80,6 +81,7 @@ def extract_text(image_path):
        else:
              corrected_text.append(word)
     return(" ".join(corrected_text))
+
 # Testing the function with an example image
 # extract_text("./image.cfm.jpeg")
 
