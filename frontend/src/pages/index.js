@@ -118,7 +118,7 @@ export default function Home() {
           {/* LEFT 1/3 AUTH PANEL */}
           <div className="w-full h-full md:w-1/3 h-screen flex flex-col justify-center items-center z-10">
             <div className="w-full h-full max-w-md bg-pink rounded-2xl shadow-xl p-8 text-black flex flex-col justify-center items-center"
-                  style={{ backgroundColor: 'rgba(37, 37, 37, 0.65)' }}>
+                  style={{ backgroundColor: 'rgba(159, 103, 131, 0.65)' }}>
 
               {/* Header */}
               <div className="text-center">
