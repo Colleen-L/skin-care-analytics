@@ -8,10 +8,10 @@ const NOTIFICATION_TYPES = {
 };
 
 const typeStyles = {
-    success: 'bg-green-50 border-green-200 text-green-800',
-    error: 'bg-red-50 border-red-200 text-red-800',
-    info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    success: 'bg-[#E8F4E8] border-[#C8E0C8] text-[#5A8B5A]',
+    error: 'bg-[#F8E8E8] border-[#E8C8C8] text-[#8B4A4A]',
+    info: 'bg-[#E8F0F8] border-[#C8D8E8] text-[#5A7B9B]',
+    warning: 'bg-[#F8F4E8] border-[#E8E0C8] text-[#8B8B5A]',
 };
 
 const iconStyles = {

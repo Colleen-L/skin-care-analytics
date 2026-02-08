@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
-export default function WalletConnectButton() {
+export default function WalletConnectButton({ size = 'default' }) {
     const { publicKey, connected } = useWallet();
     const { setVisible } = useWalletModal();
     const { connection } = useConnection();
@@ -29,23 +29,25 @@ export default function WalletConnectButton() {
         }
     }, [publicKey, connected, connection]);
 
+    const isLarge = size === 'lg';
     return (
-        <div className="flex items-center gap-4">
+        <div className={`flex items-center ${isLarge ? 'gap-4' : 'gap-3'}`}>
             {connected && publicKey && (
-                <div className="text-sm text-gray-600">
+                <div className={isLarge ? 'text-base' : 'text-sm'} style={{ color: '#8B4367' }}>
                     <div className="font-semibold">{balance.toFixed(4)} SOL</div>
-                    <div className="text-xs text-gray-500">
+                    <div className={isLarge ? 'text-sm' : 'text-xs'} style={{ color: '#A67B8B' }}>
                         {publicKey.toString().slice(0, 4)}...{publicKey.toString().slice(-4)}
                     </div>
                 </div>
             )}
             <button
                 onClick={() => setVisible(true)}
-                className={`px-4 py-2 rounded-lg font-semibold ${
+                className={`rounded-xl font-semibold transition-colors ${isLarge ? 'px-6 py-3 text-base' : 'px-4 py-2'}`}
+                style={
                     connected
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                }`}
+                        ? { background: '#D4E8D4', color: '#5A8B5A' }
+                        : { background: 'linear-gradient(135deg, #B8C6E6 0%, #A8B5D5 100%)', color: '#fff' }
+                }
             >
                 {connected ? 'Wallet Connected' : 'Connect Wallet'}
             </button>

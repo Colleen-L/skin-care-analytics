@@ -4,6 +4,7 @@ import { usePayment } from '@/hooks/usePayment';
 export default function ProductDetailModal({ product, onClose, onPurchaseSuccess }) {
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const {
         processPurchase,
@@ -15,9 +16,9 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
     } = usePayment();
 
     const getCompatibilityColor = (score) => {
-        if (score >= 90) return 'text-green-600 bg-green-50';
-        if (score >= 80) return 'text-yellow-600 bg-yellow-50';
-        return 'text-orange-600 bg-orange-50';
+        if (score >= 90) return { bg: '#D4E8D4', text: '#5A8B5A' };
+        if (score >= 80) return { bg: '#E8E4D4', text: '#8B8B5A' };
+        return { bg: '#E8D8D4', text: '#8B6B5A' };
     };
 
     const handlePurchase = async () => {
@@ -51,14 +52,39 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
 
     if (!product) return null;
 
+    const comp = getCompatibilityColor(product.compatibility);
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900">Product Details</h2>
+        <div
+            className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            style={{ background: 'rgba(139,67,103,0.15)' }}
+        >
+            <div
+                className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                style={{
+                    background: '#fefcfe',
+                    border: '1px solid #E8D4DC',
+                    boxShadow: '0 8px 32px rgba(212,165,184,0.2)',
+                }}
+            >
+                <div
+                    className="sticky top-0 p-6 flex items-center justify-between rounded-t-2xl"
+                    style={{ background: '#fefcfe', borderBottom: '1px solid #E8D4DC' }}
+                >
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-lg"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors"
+                        style={{ color: '#8B4367' }}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Back to Products
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ color: '#8B4367' }}
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -66,40 +92,57 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
                     </button>
                 </div>
                 <div className="p-6">
-                    <div className="h-64 bg-gray-100 mb-6 rounded-lg overflow-hidden">
-                        <img
-                            src={product.image}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-purple-100"><div class="text-8xl">🧴</div></div>';
-                            }}
-                        />
+                    <div className="h-64 mb-6 rounded-xl overflow-hidden" style={{ background: '#F5F0F2' }}>
+                        {!imageError ? (
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={() => setImageError(true)}
+                            />
+                        ) : (
+                            <div
+                                className="w-full h-full flex items-center justify-center"
+                                style={{ background: 'linear-gradient(135deg, #F0E4E8 0%, #E8DCE0 100%)' }}
+                            >
+                                <div className="text-8xl">🧴</div>
+                            </div>
+                        )}
                     </div>
                     <div className="mb-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${getCompatibilityColor(product.compatibility)}`}>
+                        <span
+                            className="px-3 py-1 rounded-full text-sm font-bold"
+                            style={{ background: comp.bg, color: comp.text }}
+                        >
                             {product.compatibility}% Match
                         </span>
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h3>
-                    <p className="text-xl text-gray-600 mb-4">{product.brand}</p>
-                    <p className="text-gray-700 mb-6">{product.description}</p>
+                    <h3 className="text-3xl font-bold mb-2" style={{ color: '#8B4367' }}>{product.name}</h3>
+                    <p className="text-xl mb-4" style={{ color: '#A67B8B' }}>{product.brand}</p>
+                    <p className="mb-6" style={{ color: '#6B5B63' }}>{product.description}</p>
                     <div className="mb-6">
-                        <h4 className="font-semibold text-gray-900 mb-2">Benefits:</h4>
+                        <h4 className="font-semibold mb-2" style={{ color: '#8B4367' }}>Benefits:</h4>
                         <div className="flex flex-wrap gap-2">
                             {product.benefits?.map((benefit, idx) => (
-                                <span key={idx} className="px-3 py-1 bg-rose-50 text-rose-600 text-sm rounded-full">
+                                <span
+                                    key={idx}
+                                    className="px-3 py-1 text-sm rounded-full"
+                                    style={{ background: '#F0E4E8', color: '#8B6B7B' }}
+                                >
                                     {benefit}
                                 </span>
                             ))}
                         </div>
                     </div>
                     <div className="mb-6">
-                        <h4 className="font-semibold text-gray-900 mb-2">Target Concerns:</h4>
+                        <h4 className="font-semibold mb-2" style={{ color: '#8B4367' }}>Target Concerns:</h4>
                         <div className="flex flex-wrap gap-2">
                             {product.concerns?.map((concern, idx) => (
-                                <span key={idx} className="px-3 py-1 bg-blue-50 text-blue-600 text-sm rounded-full">
+                                <span
+                                    key={idx}
+                                    className="px-3 py-1 text-sm rounded-full"
+                                    style={{ background: '#D4E8F0', color: '#5A8BA8' }}
+                                >
                                     {concern}
                                 </span>
                             ))}
@@ -107,8 +150,8 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
                     </div>
                     {product.ingredients && (
                         <div className="mb-6">
-                            <h4 className="font-semibold text-gray-900 mb-2">Ingredients:</h4>
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <h4 className="font-semibold mb-2" style={{ color: '#8B4367' }}>Ingredients:</h4>
+                            <p className="text-sm leading-relaxed" style={{ color: '#6B5B63' }}>
                                 {product.ingredients.join(', ')}
                             </p>
                         </div>
@@ -119,7 +162,8 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
                                 href={product.brandUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-purple-600 hover:text-purple-700 text-sm font-semibold"
+                                className="text-sm font-semibold"
+                                style={{ color: '#8B6B9B' }}
                             >
                                 Visit {product.brand} website →
                             </a>
@@ -128,15 +172,15 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
 
                     {/* Error Display */}
                     {showError && error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-sm text-red-600">{error.message}</p>
+                        <div className="mb-4 p-3 rounded-xl" style={{ background: '#F8E8E8', border: '1px solid #E8C8C8' }}>
+                            <p className="text-sm" style={{ color: '#8B4A4A' }}>{error.message}</p>
                         </div>
                     )}
 
                     {/* Success Feedback */}
                     {showSuccess && signature && (
-                        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <p className="text-sm text-green-600">
+                        <div className="mb-4 p-3 rounded-xl" style={{ background: '#E8F4E8', border: '1px solid #C8E0C8' }}>
+                            <p className="text-sm" style={{ color: '#5A8B5A' }}>
                                 {transactionStatus === 'pending'
                                     ? 'Transaction pending. Check your wallet.'
                                     : 'Purchase successful!'}
@@ -146,7 +190,8 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
                                     href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-sm text-green-700 underline mt-1 block"
+                                    className="text-sm underline mt-1 block"
+                                    style={{ color: '#4A7B4A' }}
                                 >
                                     View on Explorer
                                 </a>
@@ -154,20 +199,27 @@ export default function ProductDetailModal({ product, onClose, onPurchaseSuccess
                         </div>
                     )}
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-6">
+                    <div
+                        className="flex items-center justify-between p-4 rounded-xl mb-6"
+                        style={{ background: '#F5F0F2', border: '1px solid #E8DCE0' }}
+                    >
                         <div>
-                            <div className="text-sm text-gray-600">Price</div>
-                            <div className="text-2xl font-bold text-gray-900">{product.price}</div>
+                            <div className="text-sm" style={{ color: '#A67B8B' }}>Price</div>
+                            <div className="text-2xl font-bold" style={{ color: '#8B4367' }}>{product.price}</div>
                         </div>
                         <div className="text-right">
-                            <div className="text-sm text-gray-600">Solana</div>
-                            <div className="text-2xl font-bold text-purple-600">{product.solana} SOL</div>
+                            <div className="text-sm" style={{ color: '#A67B8B' }}>Solana</div>
+                            <div className="text-2xl font-bold" style={{ color: '#8B6B9B' }}>{product.solana} SOL</div>
                         </div>
                     </div>
                     <button
                         onClick={handlePurchase}
                         disabled={loading || showSuccess}
-                        className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full py-3 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                            background: 'linear-gradient(135deg, #B8C6E6 0%, #A8B5D5 100%)',
+                            color: '#fff',
+                        }}
                     >
                         {loading
                             ? transactionStatus === 'pending'
