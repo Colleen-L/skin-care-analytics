@@ -22,8 +22,7 @@ def preprocess_for_ocr(image_path):
     img = cv2.erode(img, kernel, iterations=1)
 
     # Convert to PIL object for pytesseract
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = Image.fromarray(img_rgb)
+    img = Image.fromarray(img, mode='L')
     
     return img
 
