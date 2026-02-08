@@ -9,6 +9,7 @@ export default function Analytics() {
     const [analyticsData, setAnalyticsData] = useState(null);
     const [skinProgress, setSkinProgress] = useState(null);
     const [productEffectiveness, setProductEffectiveness] = useState(null);
+    const [activeTooltip, setActiveTooltip] = useState(null);
 
     useEffect(() => {
         fetchAnalytics();
@@ -73,6 +74,54 @@ export default function Analytics() {
         if (change < 0) return '↘';
         return '→';
     };
+
+    const InfoIcon = ({ tooltipId, content }) => (
+        <div className="relative inline-block">
+            <button
+                onClick={() => setActiveTooltip(activeTooltip === tooltipId ? null : tooltipId)}
+                className="ml-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold transition-opacity hover:opacity-80"
+                style={{
+                    background: 'rgba(212, 165, 184, 0.3)',
+                    color: '#8B4367',
+                    border: '1px solid rgba(212, 165, 184, 0.5)',
+                }}
+            >
+                ?
+            </button>
+            {activeTooltip === tooltipId && (
+                <>
+                    {/* Backdrop to close tooltip */}
+                    <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setActiveTooltip(null)}
+                    />
+                    {/* Tooltip */}
+                    <div
+                        className="absolute z-50 p-4 rounded-lg shadow-lg text-sm left-0 top-8"
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.85)',
+                            border: '1px solid #E8D4DC',
+                            color: '#8B4367',
+                            backdropFilter: 'blur(8px)',
+                            minWidth: '280px',
+                            maxWidth: '400px',
+                        }}
+                    >
+                        {content}
+                        <div
+                            className="absolute w-3 h-3 transform rotate-45 -top-1.5 left-4"
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.85)',
+                                border: '1px solid #E8D4DC',
+                                borderRight: 'none',
+                                borderBottom: 'none',
+                            }}
+                        />
+                    </div>
+                </>
+            )}
+        </div>
+    );
 
     if (loading) {
         return (
@@ -158,9 +207,15 @@ export default function Analytics() {
                 </header>
 
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-                                        {/* Consistency Tracker */}
+                    {/* Consistency Tracker */}
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Routine Consistency 🎯</h2>
+                        <div className="flex items-center mb-4">
+                            <h2 className="text-2xl font-bold" style={{ color: '#8B4367' }}>Routine Consistency 🎯</h2>
+                            <InfoIcon
+                                tooltipId="consistency-main"
+                                content="Track how consistently you're logging your skincare routine. Regular tracking helps identify what works best for your skin!"
+                            />
+                        </div>
                         <div
                             className="rounded-xl p-6"
                             style={{
@@ -169,7 +224,33 @@ export default function Analytics() {
                                 boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
                             }}
                         >
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {/* Motivation Message */}
+                            <div
+                                className="rounded-xl p-4"
+                                style={{
+                                    background: 'linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%)',
+                                    border: '1px solid rgba(212,165,184,0.5)',
+                                }}
+                            >
+                                <div className="flex items-center justify-between text-white">
+                                    <div>
+                                        <p className="font-semibold">
+                                            {consistencyData.streak > 0 ? `${consistencyData.streak} day streak!` : 'Start your streak today!'}
+                                        </p>
+                                        <p className="text-sm opacity-90">
+                                            {consistencyData.percentage >= 80 
+                                                ? "Amazing consistency! Keep it up!" 
+                                                : consistencyData.percentage >= 50 
+                                                ? "Good progress! Try to log daily." 
+                                                : "Start logging daily to see your skin improve!"}
+                                        </p>
+                                    </div>
+                                    <div className="text-5xl">
+                                        {consistencyData.streak > 7 ? '🔥' : consistencyData.streak > 0 ? '✨' : '💪'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
                                 <div className="text-center">
                                     <div className="relative inline-flex items-center justify-center">
                                         <svg className="w-32 h-32">
@@ -201,66 +282,46 @@ export default function Analytics() {
                                     <p className="font-medium mt-2" style={{ color: '#A67B8B' }}>Overall</p>
                                 </div>
 
-                                <div className="text-center">
+                                <div className="text-center flex flex-col justify-center">
                                     <div className="text-5xl font-bold" style={{ color: '#D4A5B8' }}>{consistencyData.streak}</div>
-                                    <p className="font-medium" style={{ color: '#A67B8B' }}>Day Streak 🔥</p>
+                                    <p className="font-medium mt-2" style={{ color: '#A67B8B' }}>Day Streak 🔥</p>
                                 </div>
 
-                                <div className="text-center">
+                                <div className="text-center flex flex-col justify-center">
                                     <div className="text-5xl font-bold" style={{ color: '#5A8B5A' }}>{consistencyData.completed_days}</div>
-                                    <p className="font-medium" style={{ color: '#A67B8B' }}>Days Completed ✅</p>
+                                    <p className="font-medium mt-2" style={{ color: '#A67B8B' }}>Days Completed ✅</p>
                                 </div>
 
-                                <div className="text-center">
+                                <div className="text-center flex flex-col justify-center">
                                     {analyticsData.skin_trends.most_common_condition ? (
                                         <>
                                             <div className="text-3xl font-bold" style={{ color: '#B8C6E6' }}>
                                                 {analyticsData.skin_trends.most_common_condition}
                                             </div>
-                                            <p className="font-medium" style={{ color: '#A67B8B' }}>Most Common Condition</p>
+                                            <p className="font-medium mt-2" style={{ color: '#A67B8B' }}>Most Common Condition</p>
                                         </>
                                     ) : (
                                         <>
                                             <div className="text-5xl font-bold" style={{ color: '#C4A8B4' }}>{consistencyData.missed_days}</div>
-                                            <p className="font-medium" style={{ color: '#A67B8B' }}>Days Missed</p>
+                                            <p className="font-medium mt-2" style={{ color: '#A67B8B' }}>Days Missed</p>
                                         </>
                                     )}
                                 </div>
                             </div>
-
-                            {/* Motivation Message */}
-                            <div
-                                className="mt-6 rounded-xl p-4"
-                                style={{
-                                    background: 'linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%)',
-                                    border: '1px solid rgba(212,165,184,0.5)',
-                                }}
-                            >
-                                <div className="flex items-center justify-between text-white">
-                                    <div>
-                                        <p className="font-semibold">
-                                            {consistencyData.streak > 0 ? `${consistencyData.streak} day streak!` : 'Start your streak today!'}
-                                        </p>
-                                        <p className="text-sm opacity-90">
-                                            {consistencyData.percentage >= 80 
-                                                ? "Amazing consistency! Keep it up!" 
-                                                : consistencyData.percentage >= 50 
-                                                ? "Good progress! Try to log daily." 
-                                                : "Start logging daily to see your skin improve!"}
-                                        </p>
-                                    </div>
-                                    <div className="text-5xl">
-                                        {consistencyData.streak > 7 ? '🔥' : consistencyData.streak > 0 ? '✨' : '💪'}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
+
                     {/* Skin Progress Overview */}
                     {Object.keys(skinMetrics).length > 0 ? (
                         <div className="mb-8">
-                            <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Skin Progress 📊</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="flex items-center mb-4">
+                                <h2 className="text-2xl font-bold" style={{ color: '#8B4367' }}>Skin Progress 📊</h2>
+                                <InfoIcon
+                                    tooltipId="skin-progress-main"
+                                    content="Tracks specific skin concerns over time based on AI analysis of your photos. Compares first half vs. second half of your time period to detect trends. Higher scores = better skin!"
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                                 {Object.entries(skinMetrics).map(([key, data]) => (
                                     <div
                                         key={key}
@@ -272,9 +333,22 @@ export default function Analytics() {
                                         }}
                                     >
                                         <div className="flex items-center justify-between mb-2">
-                                            <h3 className="capitalize" style={{ color: '#A67B8B' }}>
-                                                {key.replace('_', ' ')}
-                                            </h3>
+                                            <div className="flex items-center">
+                                                <h3 className="capitalize" style={{ color: '#A67B8B' }}>
+                                                    {key.replace('_', ' ')}
+                                                </h3>
+                                                <InfoIcon
+                                                    tooltipId={`metric-${key}`}
+                                                    content={
+                                                        key === 'acne' ? 'Tracks breakouts, pimples, and blemishes detected in your photos.' :
+                                                        key === 'dark_circles' ? 'Monitors under-eye darkness and discoloration.' :
+                                                        key === 'wrinkles' ? 'Detects fine lines, wrinkles, and crow\'s feet.' :
+                                                        key === 'spots' ? 'Tracks pigmentation, dark spots, and hyperpigmentation.' :
+                                                        key === 'pores' ? 'Monitors enlarged or visible pores.' :
+                                                        'AI-detected skin concern tracked over time.'
+                                                    }
+                                                />
+                                            </div>
                                             <span className="text-2xl" style={getChangeColor(data.change)}>
                                                 {getChangeIcon(data.change)}
                                             </span>
@@ -320,7 +394,13 @@ export default function Analytics() {
                     {/* Product Usage */}
                     {productUsage.length > 0 && (
                         <div className="mb-8">
-                            <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Product Usage 🧴</h2>
+                            <div className="flex items-center mb-4">
+                                <h2 className="text-2xl font-bold" style={{ color: '#8B4367' }}>Product Usage 🧴</h2>
+                                <InfoIcon
+                                    tooltipId="product-usage-main"
+                                    content="Shows which products you've used most frequently and how consistently you're using them. Helps track your routine adherence!"
+                                />
+                            </div>
                             <div
                                 className="rounded-xl p-6"
                                 style={{
@@ -362,7 +442,13 @@ export default function Analytics() {
                     {/* Product Effectiveness */}
                     {productEffectiveness?.products && productEffectiveness.products.length > 0 && (
                         <div className="mb-8">
-                            <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Product Effectiveness 💫</h2>
+                            <div className="flex items-center mb-4">
+                                <h2 className="text-2xl font-bold" style={{ color: '#8B4367' }}>Product Effectiveness 💫</h2>
+                                <InfoIcon
+                                    tooltipId="product-effectiveness-main"
+                                    content="Correlates products with your skin condition outcomes. Skin scores range from 0-100 (Clear=100, Normal=90, Combination=70, Dry/Oily=60, Sensitive=50, Acne=30). Higher scores indicate better results when using that product!"
+                                />
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {productEffectiveness.products.slice(0, 6).map((product) => (
                                     <div
@@ -377,7 +463,13 @@ export default function Analytics() {
                                         <h3 className="font-bold mb-2" style={{ color: '#8B4367' }}>{product.product_name}</h3>
                                         <div className="mb-3">
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className="text-sm" style={{ color: '#A67B8B' }}>Skin Score</span>
+                                                <div className="flex items-center">
+                                                    <span className="text-sm" style={{ color: '#A67B8B' }}>Skin Score</span>
+                                                    <InfoIcon
+                                                        tooltipId={`product-score-${product.product_name}`}
+                                                        content="Average skin quality score when using this product. Higher scores mean better skin outcomes!"
+                                                    />
+                                                </div>
                                                 <span className="text-sm font-bold" style={{ color: '#8B4367' }}>
                                                     {product.average_skin_score}/100
                                                 </span>
