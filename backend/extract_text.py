@@ -1,10 +1,21 @@
-from email.mime import text
 import pytesseract
 from spellchecker import SpellChecker
 from PIL import Image
 import re
 import cv2
 import numpy as np
+import os
+
+def get_ingredients(text):
+    result_set = set()
+    for filename in os.listdir('./ingredients'):
+        with open(f"./ingredients/{filename}", 'r') as f:
+            # Strip whitespace and lowercase every word
+            ingredient_set = {line.strip().lower() for line in f if line.strip()}
+        for word in text.split():
+            if word.lower() in ingredient_set:
+                result_set.add(word.lower())
+    return list(result_set)
 
 def preprocess_for_ocr(image_path):
     # Load image in grayscale
@@ -50,19 +61,6 @@ def extract_text(image_path):
     # Use pyspellchecker to correct misspelled words in the extracted text
     spell = SpellChecker(distance=1)
     spell.word_frequency.load_text_file('./ingredients/ingredient_dictionary.txt')
-    active_start = text.find("Active")
-    inactive_start = text.find("Inactive")
-    
-    # 2. Extract Active Ingredients (from "Active" until the first double-newline)
-    active_blob = text[active_start:]
-    active_text = active_blob[:active_blob.find("\n\n")].strip()
-    
-    # 3. Extract Inactive Ingredients (from "Inactive" until the first double-newline)
-    inactive_blob = text[inactive_start:]
-    inactive_text = inactive_blob[:inactive_blob.find("\n\n")].strip()
-
-    # 4. Join them
-    text = f"{active_text}\n{inactive_text}"
 
     # 5. Strip hallucinations and correct spelling
     text = strip_hallucinations(text)
@@ -80,7 +78,9 @@ def extract_text(image_path):
                corrected_text.append(corrected_word)
        else:
              corrected_text.append(word)
-    return(" ".join(corrected_text))
+    text = " ".join(corrected_text)
+    return text
+    #return(get_ingredients(text))
 
 # Testing the function with an example image
 # extract_text("./image.cfm.jpeg")
