@@ -28,13 +28,13 @@ export default function Dashboard() {
       const data = await response.json();
       setCalendarData(data);
       
-      // Convert to FullCalendar events format (pastel colors)
+      // Convert to FullCalendar events format (single color for all entries)
       const calendarEvents = Object.entries(data).map(([date, entry]) => ({
         id: entry.id,
-        title: `${entry.skin_condition || 'Entry'} ${entry.has_image ? '📷' : ''}`,
+        title: entry.skin_condition || 'Entry',
         date: date,
-        backgroundColor: entry.has_image ? '#D4A5B8' : '#B8C6E6',
-        borderColor: entry.has_image ? '#C495A8' : '#A8B5D5',
+        backgroundColor: '#B8C6E6',
+        borderColor: '#A8B5D5',
         extendedProps: {
           ...entry
         }
@@ -129,41 +129,6 @@ export default function Dashboard() {
               selectedEntry: {selectedEntry ? 'exists' : 'null'}
             </p>
           </div> */}
-          
-          {/* Calendar */}
-          <div
-            className="rounded-2xl p-6 mb-6"
-            style={{
-              background: 'rgba(255,255,255,0.8)',
-              border: '1px solid #E8D4DC',
-              boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
-            }}
-          >
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={events}
-              dateClick={handleDateClick}
-              eventClick={handleEventClick}
-              selectable={true}
-              selectMirror={true}
-              editable={false}
-              navLinks={false}
-              height="auto"
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: ''
-              }}
-              eventDisplay="block"
-              dayMaxEvents={true}
-              eventTimeFormat={{
-                hour: 'numeric',
-                minute: '2-digit',
-                meridiem: 'short'
-              }}
-            />
-          </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -228,14 +193,45 @@ export default function Dashboard() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>With Photos</div>
-                  <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
-                    {Object.values(calendarData).filter(entry => entry.has_image).length}
+                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>Current Streak</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
+                      {(() => {
+                        // Calculate streak: consecutive days with entries
+                        // Like Duolingo - if you did it yesterday, streak continues until end of today
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const todayStr = today.toISOString().split('T')[0];
+                        
+                        // Start from yesterday if no entry today, otherwise start from today
+                        let currentDate = new Date(today);
+                        if (!calendarData[todayStr]) {
+                          currentDate.setDate(currentDate.getDate() - 1);
+                        }
+                        
+                        let streak = 0;
+                        
+                        // Check each day backwards
+                        while (true) {
+                          const dateStr = currentDate.toISOString().split('T')[0];
+                          if (calendarData[dateStr]) {
+                            streak++;
+                            currentDate.setDate(currentDate.getDate() - 1);
+                          } else {
+                            break;
+                          }
+                        }
+                        
+                        return streak;
+                      })()}
+                    </div>
+                    <div className="text-sm" style={{ color: '#A67B8B' }}>days</div>
                   </div>
                 </div>
-                <div className="rounded-full p-3" style={{ background: '#D4E8F0' }}>
-                  <svg className="w-8 h-8" style={{ color: '#5A8BA8' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div className="rounded-full p-3" style={{ background: '#FFE8D4' }}>
+                  <svg className="w-8 h-8" style={{ color: '#D97F3E' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
                   </svg>
                 </div>
               </div>
@@ -253,14 +249,51 @@ export default function Dashboard() {
           >
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded" style={{ background: '#D4A5B8' }}></div>
-                <span className="text-sm" style={{ color: '#8B4367' }}>Entry with photo</span>
+                <div className="w-4 h-4 rounded" style={{ background: '#B8C6E6' }}></div>
+                <span className="text-sm" style={{ color: '#8B4367' }}>Skincare entry logged</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded" style={{ background: '#B8C6E6' }}></div>
-                <span className="text-sm" style={{ color: '#8B4367' }}>Entry without photo</span>
+                <svg className="w-5 h-5" style={{ color: '#D97F3E' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                </svg>
+                <span className="text-sm" style={{ color: '#8B4367' }}>Keep your streak going!</span>
               </div>
             </div>
+          </div>
+          
+          {/* Calendar */}
+          <div
+            className="rounded-2xl p-6 mt-6 mb-6"
+            style={{
+              background: 'rgba(255,255,255,0.8)',
+              border: '1px solid #E8D4DC',
+              boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
+            }}
+          >
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={events}
+              dateClick={handleDateClick}
+              eventClick={handleEventClick}
+              selectable={true}
+              selectMirror={true}
+              editable={false}
+              navLinks={false}
+              height="auto"
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+              }}
+              eventDisplay="block"
+              dayMaxEvents={true}
+              eventTimeFormat={{
+                hour: 'numeric',
+                minute: '2-digit',
+                meridiem: 'short'
+              }}
+            />
           </div>
         </div>
 
