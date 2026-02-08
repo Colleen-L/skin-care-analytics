@@ -22,11 +22,13 @@ class EntryCreate(BaseModel):
     skin_condition: Optional[str] = None
     notes: Optional[str] = None
     products: Optional[List[ProductCreate]] = []
+    analysis_result: Optional[str] = None  # ← ADDED
 
 class EntryUpdate(BaseModel):
     skin_condition: Optional[str] = None
     notes: Optional[str] = None
     products: Optional[List[ProductCreate]] = None
+    analysis_result: Optional[str] = None  # ← ADDED
 
 class EntryResponse(BaseModel):
     id: int
@@ -107,6 +109,7 @@ async def get_entry_by_date(date_str: str, db: Session = Depends(get_db)):
     ).all()
     
     print(f"DEBUG: Fetching entry {entry.id} for date {entry_date}")
+    print(f"DEBUG: analysis_result = {entry.analysis_result}")  # ← ADDED DEBUG
     print(f"DEBUG: Found {len(products)} products")
     for p in products:
         print(f"  - {p.product_name}")
@@ -150,7 +153,8 @@ async def create_entry(entry_data: EntryCreate, db: Session = Depends(get_db)):
         user_id=user_id,
         date=entry_data.date,
         skin_condition=entry_data.skin_condition,
-        notes=entry_data.notes
+        notes=entry_data.notes,
+        analysis_result=entry_data.analysis_result  # ← ADDED
     )
     db.add(new_entry)
     db.commit()
@@ -178,6 +182,7 @@ async def create_entry(entry_data: EntryCreate, db: Session = Depends(get_db)):
         "date": str(new_entry.date),
         "skin_condition": new_entry.skin_condition,
         "notes": new_entry.notes,
+        "analysis_result": new_entry.analysis_result,  # ← ADDED
         "message": "Entry created successfully"
     }
 
@@ -206,6 +211,8 @@ async def update_entry(
         entry.skin_condition = entry_data.skin_condition
     if entry_data.notes is not None:
         entry.notes = entry_data.notes
+    if entry_data.analysis_result is not None:  # ← ADDED
+        entry.analysis_result = entry_data.analysis_result
     
     # Update products
     if entry_data.products is not None:
@@ -233,6 +240,8 @@ async def update_entry(
     
     db.commit()
     db.refresh(entry)
+    
+    print(f"DEBUG: Updated entry analysis_result = {entry.analysis_result}")  # ← ADDED DEBUG
     
     return {
         "id": entry.id,

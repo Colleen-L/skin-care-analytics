@@ -107,21 +107,17 @@ export default function Products() {
                             </svg>
                         </button>
 
-                        {/* Center: Profile picture placeholder + "Based on profile" */}
+                        {/* Center: Profile picture + "Based on profile" */}
                         <div className="flex-1 flex items-center gap-5 min-w-0">
                             <div
-                                className="flex-shrink-0 w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-cover bg-center"
-                                style={{
-                                    background: profileImageUrl ? `url(${profileImageUrl})` : '#F5E6DC',
-                                    border: '2px solid #D4A5B8',
-                                    color: profileImageUrl ? 'transparent' : '#D4A5B8',
-                                }}
+                                className="flex-shrink-0 w-28 h-28 rounded-full overflow-hidden flex items-center justify-center"
+                                style={{ border: '2px solid #D4A5B8' }}
                             >
-                                {!profileImageUrl && (
-                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                )}
+                                <img
+                                    src={profileImageUrl || '/commerce-bg.jpeg'}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
                             <div className="min-w-0">
                                 <p className="text-lg font-semibold truncate" style={{ color: '#8B4367' }}>

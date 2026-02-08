@@ -28,13 +28,13 @@ export default function Dashboard() {
       const data = await response.json();
       setCalendarData(data);
       
-      // Convert to FullCalendar events format (pastel colors)
+      // Convert to FullCalendar events format (single color for all entries)
       const calendarEvents = Object.entries(data).map(([date, entry]) => ({
         id: entry.id,
-        title: `${entry.skin_condition || 'Entry'} ${entry.has_image ? '📷' : ''}`,
+        title: entry.skin_condition || 'Entry',
         date: date,
-        backgroundColor: entry.has_image ? '#D4A5B8' : '#B8C6E6',
-        borderColor: entry.has_image ? '#C495A8' : '#A8B5D5',
+        backgroundColor: '#B8C6E6',
+        borderColor: '#A8B5D5',
         extendedProps: {
           ...entry
         }
@@ -60,6 +60,7 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         console.log('Entry found:', data);
+        console.log('Analysis result in fetched data:', data.analysis_result);
         setSelectedEntry(data);
       } else {
         console.log('No entry found for this date');
@@ -128,41 +129,6 @@ export default function Dashboard() {
               selectedEntry: {selectedEntry ? 'exists' : 'null'}
             </p>
           </div> */}
-          
-          {/* Calendar */}
-          <div
-            className="rounded-2xl p-6 mb-6"
-            style={{
-              background: 'rgba(255,255,255,0.8)',
-              border: '1px solid #E8D4DC',
-              boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
-            }}
-          >
-            <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView="dayGridMonth"
-              events={events}
-              dateClick={handleDateClick}
-              eventClick={handleEventClick}
-              selectable={true}
-              selectMirror={true}
-              editable={false}
-              navLinks={false}
-              height="auto"
-              headerToolbar={{
-                left: 'prev,next today',
-                center: 'title',
-                right: ''
-              }}
-              eventDisplay="block"
-              dayMaxEvents={true}
-              eventTimeFormat={{
-                hour: 'numeric',
-                minute: '2-digit',
-                meridiem: 'short'
-              }}
-            />
-          </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -227,14 +193,45 @@ export default function Dashboard() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>With Photos</div>
-                  <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
-                    {Object.values(calendarData).filter(entry => entry.has_image).length}
+                  <div className="text-sm mb-1" style={{ color: '#A67B8B' }}>Current Streak</div>
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-3xl font-bold" style={{ color: '#8B4367' }}>
+                      {(() => {
+                        // Calculate streak: consecutive days with entries
+                        // Like Duolingo - if you did it yesterday, streak continues until end of today
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const todayStr = today.toISOString().split('T')[0];
+                        
+                        // Start from yesterday if no entry today, otherwise start from today
+                        let currentDate = new Date(today);
+                        if (!calendarData[todayStr]) {
+                          currentDate.setDate(currentDate.getDate() - 1);
+                        }
+                        
+                        let streak = 0;
+                        
+                        // Check each day backwards
+                        while (true) {
+                          const dateStr = currentDate.toISOString().split('T')[0];
+                          if (calendarData[dateStr]) {
+                            streak++;
+                            currentDate.setDate(currentDate.getDate() - 1);
+                          } else {
+                            break;
+                          }
+                        }
+                        
+                        return streak;
+                      })()}
+                    </div>
+                    <div className="text-sm" style={{ color: '#A67B8B' }}>days</div>
                   </div>
                 </div>
-                <div className="rounded-full p-3" style={{ background: '#D4E8F0' }}>
-                  <svg className="w-8 h-8" style={{ color: '#5A8BA8' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div className="rounded-full p-3" style={{ background: '#FFE8D4' }}>
+                  <svg className="w-8 h-8" style={{ color: '#D97F3E' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
                   </svg>
                 </div>
               </div>
@@ -252,14 +249,51 @@ export default function Dashboard() {
           >
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded" style={{ background: '#D4A5B8' }}></div>
-                <span className="text-sm" style={{ color: '#8B4367' }}>Entry with photo</span>
+                <div className="w-4 h-4 rounded" style={{ background: '#B8C6E6' }}></div>
+                <span className="text-sm" style={{ color: '#8B4367' }}>Skincare entry logged</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded" style={{ background: '#B8C6E6' }}></div>
-                <span className="text-sm" style={{ color: '#8B4367' }}>Entry without photo</span>
+                <svg className="w-5 h-5" style={{ color: '#D97F3E' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                </svg>
+                <span className="text-sm" style={{ color: '#8B4367' }}>Keep your streak going!</span>
               </div>
             </div>
+          </div>
+          
+          {/* Calendar */}
+          <div
+            className="rounded-2xl p-6 mt-6 mb-6"
+            style={{
+              background: 'rgba(255,255,255,0.8)',
+              border: '1px solid #E8D4DC',
+              boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
+            }}
+          >
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              events={events}
+              dateClick={handleDateClick}
+              eventClick={handleEventClick}
+              selectable={true}
+              selectMirror={true}
+              editable={false}
+              navLinks={false}
+              height="auto"
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+              }}
+              eventDisplay="block"
+              dayMaxEvents={true}
+              eventTimeFormat={{
+                hour: 'numeric',
+                minute: '2-digit',
+                meridiem: 'short'
+              }}
+            />
           </div>
         </div>
 
@@ -356,7 +390,9 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
 
   // Sync state when entry data loads or changes
   useEffect(() => {
+    console.log('Entry prop changed:', entry);
     if (entry) {
+      console.log('Entry has analysis_result:', entry.analysis_result);
       setLocalEntry(entry);
       setNotes(entry.notes || '');
       setSkinCondition(entry.skin_condition || '');
@@ -368,6 +404,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
       // If entry exists and has data, start in view mode
       setIsEditMode(!entry.id);
     } else {
+      console.log('No entry - starting in edit mode');
       // New entry - start in edit mode
       setIsEditMode(true);
     }
@@ -493,29 +530,107 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
       if (response.ok) {
         const data = await response.json();
         console.log("AI analysis result:", data);
-        // Update both local and parent entry state
+        
+        // Update local state immediately
         const updatedEntry = { ...localEntry, analysis_result: data.result };
         setLocalEntry(updatedEntry);
         onUpdateEntry(updatedEntry);
+        
+        // Immediately save the analysis result to backend
+        await saveAnalysisToBackend(data.result, token);
+        
         setAnalysisStatus('success');
         // Clear status after 3 seconds
         setTimeout(() => setAnalysisStatus(''), 3000);
       } else {
         const errorText = await response.text();
         console.error("AI analysis failed:", errorText);
-        // Don't show alert - user can still save their entry
+        setAnalysisStatus('error');
+        setTimeout(() => setAnalysisStatus(''), 3000);
       }
     } catch (err) {
       if (err.name === 'AbortError') {
         console.error("AI analysis timeout");
-        // Don't show alert - user can still save their entry
+        setAnalysisStatus('timeout');
       } else {
         console.error("Error sending to AI:", err);
-        // Don't show alert - user can still save their entry
+        setAnalysisStatus('error');
       }
+      setTimeout(() => setAnalysisStatus(''), 3000);
     } finally {
       setIsLoading(false);
       console.log("AI analysis complete, loading set to false");
+    }
+  };
+
+  const saveAnalysisToBackend = async (analysisResult, token) => {
+    try {
+      console.log("Saving analysis result to backend...");
+      
+      // First check if entry exists
+      let entryId = localEntry?.id;
+      
+      if (!entryId || typeof entryId !== 'number') {
+        // Try to fetch existing entry
+        try {
+          const checkResponse = await fetch(`http://localhost:8000/skincare/entries/${dateStr}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          
+          if (checkResponse.ok) {
+            const existingEntry = await checkResponse.json();
+            entryId = existingEntry.id;
+          }
+        } catch (err) {
+          // Entry doesn't exist yet
+        }
+      }
+      
+      const payload = {
+        date: dateStr,
+        notes: notes || '',
+        skin_condition: skinCondition || null,
+        products: products || [],
+        analysis_result: analysisResult,
+      };
+      
+      let response;
+      
+      if (entryId && typeof entryId === 'number') {
+        // Update existing entry
+        response = await fetch(`http://localhost:8000/skincare/entries/${entryId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        // Create new entry
+        response = await fetch('http://localhost:8000/skincare/entries', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+      
+      if (response.ok) {
+        const savedEntry = await response.json();
+        console.log("Analysis saved successfully:", savedEntry);
+        // Update local entry with the saved entry data (including ID if it was newly created)
+        setLocalEntry(savedEntry);
+        onUpdateEntry(savedEntry);
+      } else {
+        console.error("Failed to save analysis:", response.status);
+      }
+    } catch (error) {
+      console.error("Error saving analysis to backend:", error);
     }
   };
 
@@ -580,11 +695,13 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
     const token = localStorage.getItem('access_token');
     
     try {
+      // Include analysis_result in the payload to be saved
       const payload = {
         date: dateStr,
         notes,
         skin_condition: skinCondition,
         products,
+        analysis_result: localEntry?.analysis_result || null,
       };
 
       let savedEntryId = localEntry?.id;
@@ -604,6 +721,7 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
             savedEntryId = existingEntry.id;
           }
         } catch (err) {
+          // Entry doesn't exist yet, will create below
         }
       }
       
@@ -642,12 +760,10 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
         savedEntryId = savedEntry.id;
       }
 
-      // Upload image if we have one - REMOVED: We don't want to save images anymore
-      
-      // Success - refetch the entry to get updated data with products
+      // Success - refetch the entry to get updated data with products and analysis
       setIsLoading(false);
       
-      // Fetch the updated entry to get all data including products
+      // Fetch the updated entry to get all data including products and analysis_result
       if (savedEntryId) {
         try {
           const refetchResponse = await fetch(`http://localhost:8000/skincare/entries/${dateStr}`, {
@@ -947,13 +1063,14 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
               )}
             </div>
 
+            {/* AI Analysis Result - Always show if available */}
             {localEntry?.analysis_result && (
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: '#8B4367' }}>
                   🤖 AI Analysis
                 </label>
                 <div className="p-4 rounded-xl" style={{ background: '#F0E4E8' }}>
-                  <p style={{ color: '#8B4367' }}>{localEntry.analysis_result}</p>
+                  <p className="whitespace-pre-wrap" style={{ color: '#8B4367' }}>{localEntry.analysis_result}</p>
                 </div>
               </div>
             )}
@@ -965,7 +1082,27 @@ function EntryModal({ dateStr, entry, onClose, onSave, onUpdateEntry }) {
                   <svg className="w-5 h-5" style={{ color: '#5A8B5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <p className="text-sm font-medium" style={{ color: '#5A8B5A' }}>AI analysis complete!</p>
+                  <p className="text-sm font-medium" style={{ color: '#5A8B5A' }}>AI analysis complete! The analysis will be saved with your entry.</p>
+                </div>
+              </div>
+            )}
+            {analysisStatus === 'error' && (
+              <div className="rounded-xl p-3" style={{ background: '#F4E8E8', border: '1px solid #E0C8C8' }}>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" style={{ color: '#8B5A5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <p className="text-sm font-medium" style={{ color: '#8B5A5A' }}>AI analysis failed. You can still save your entry.</p>
+                </div>
+              </div>
+            )}
+            {analysisStatus === 'timeout' && (
+              <div className="rounded-xl p-3" style={{ background: '#F4F0E8', border: '1px solid #E0DCC8' }}>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" style={{ color: '#8B7B5A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="text-sm font-medium" style={{ color: '#8B7B5A' }}>AI analysis timed out. You can still save your entry.</p>
                 </div>
               </div>
             )}
