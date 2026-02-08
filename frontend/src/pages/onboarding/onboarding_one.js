@@ -86,10 +86,23 @@ export default function Onboarding() {
                 <title>Onboarding - SkinCare AI</title>
             </Head>
 
-            <div className="min-h-screen flex flex-col" style={{ background: '#fef2f9' }}>
+            <div className="min-h-screen flex flex-col relative">
+                {/* Background - Product 2.gif across all onboarding steps */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/Product%202.gif"
+                        alt=""
+                        className="w-full h-full object-cover"
+                    />
+                    <div
+                        className="absolute inset-0 z-[1]"
+                        style={{ background: 'rgba(254,242,249,0.75)' }}
+                    />
+                </div>
+
                 {/* Header - Pastel layout */}
                 <header
-                    className="flex-shrink-0 border-b px-4 sm:px-6 py-4 flex items-center gap-3"
+                    className="relative z-10 flex-shrink-0 border-b px-4 sm:px-6 py-4 flex items-center gap-3"
                     style={{
                         background: 'rgba(255,255,255,0.9)',
                         borderColor: '#E8D4DC',
@@ -108,7 +121,7 @@ export default function Onboarding() {
                     <h1 className="text-xl font-bold" style={{ color: '#8B4367' }}>Onboarding</h1>
                 </header>
 
-                <main className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+                <main className="relative z-10 flex-1 min-h-0 overflow-y-auto flex flex-col">
                     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col">
                     {/* Progress Bar */}
                     <div className="mb-8">
