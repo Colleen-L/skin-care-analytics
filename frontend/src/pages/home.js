@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const router = useRouter();
   const [userName, setUserName] = useState('User');
+  const [heroImgError, setHeroImgError] = useState(false);
 
   useEffect(() => {
     const profile = localStorage.getItem('skinProfile');
@@ -106,24 +107,34 @@ export default function Home() {
         {/* Main content */}
         <main className="relative z-10 flex-1 flex justify-center px-6 sm:px-8 pb-8 sm:pb-10">
           <div className="flex w-full max-w-5xl mx-auto">
-            {/* Left 40% - Hero image placeholder */}
+            {/* Left 40% - Hero image */}
             <div
               className="hidden md:flex flex-1 max-w-[40%] items-center justify-center pr-3 lg:pr-4"
               style={{ minHeight: 360 }}
             >
               <div
-                className="w-full aspect-[3/4] max-h-[380px] rounded-2xl flex items-center justify-center"
+                className="w-full aspect-[3/4] max-h-[380px] rounded-2xl overflow-hidden flex items-center justify-center"
                 style={{
                   background: 'linear-gradient(180deg, rgba(254,246,250,0.8) 0%, rgba(255,255,255,0.6) 100%)',
-                  border: '2px dashed #D4A5B8',
+                  border: '2px solid #E8D4DC',
                 }}
               >
-                <span
-                  className="text-sm font-medium opacity-60"
-                  style={{ color: '#8B4367' }}
-                >
-                  Hero image
-                </span>
+                {/* Add your image to frontend/public/images/hero.jpg (or .png) */}
+                {!heroImgError ? (
+                  <img
+                    src="/images/hero.jpg"
+                    alt="Skin care"
+                    className="w-full h-full object-cover"
+                    onError={() => setHeroImgError(true)}
+                  />
+                ) : (
+                  <span
+                    className="text-sm font-medium opacity-60"
+                    style={{ color: '#8B4367' }}
+                  >
+                    Hero image
+                  </span>
+                )}
               </div>
             </div>
 
