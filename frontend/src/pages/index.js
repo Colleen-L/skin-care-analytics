@@ -46,7 +46,8 @@ export default function Home() {
       }
 
       localStorage.setItem('access_token', data.access_token);
-      router.push('/home');
+      const hasProfile = localStorage.getItem('skinProfile');
+      router.push(hasProfile ? '/home' : '/onboarding/onboarding_one');
     } catch {
       setError('Cannot connect to backend (localhost:8000)');
       setIsLoading(false);
@@ -284,11 +285,11 @@ export default function Home() {
                   setError('');
                   setSuccessMessage('');
                 }}
-                className="text-sm underline"
+                className="text-sm underline text-gray-600 hover:text-gray-900"
               >
                 {isLogin
                   ? "Don't have an account? Sign up"
-                  : ''}
+                  : 'Back to Login'}
               </button>
             </div>
           </div>

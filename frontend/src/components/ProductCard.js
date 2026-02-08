@@ -19,9 +19,9 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
     } = usePayment();
 
     const getCompatibilityColor = (score) => {
-        if (score >= 90) return 'text-green-600 bg-green-50';
-        if (score >= 80) return 'text-yellow-600 bg-yellow-50';
-        return 'text-orange-600 bg-orange-50';
+        if (score >= 90) return { bg: '#D4E8D4', text: '#5A8B5A' };
+        if (score >= 80) return { bg: '#E8E4D4', text: '#8B8B5A' };
+        return { bg: '#E8D8D4', text: '#8B6B5A' };
     };
 
     // Debounced purchase handler to prevent double-clicks
@@ -102,24 +102,38 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
         }
     };
 
-    const getButtonClass = () => {
-        const baseClass = 'flex-1 py-2 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
-        
+    const getButtonStyle = () => {
         switch (buttonState) {
             case 'loading':
-                return `${baseClass} bg-purple-600 text-white cursor-wait`;
+                return { background: '#B8C6E6', color: '#fff', cursor: 'wait' };
             case 'success':
-                return `${baseClass} bg-green-600 text-white`;
+                return { background: '#B8E6B8', color: '#4A7B4A' };
             case 'error':
-                return `${baseClass} bg-red-600 text-white hover:bg-red-700 animate-shake`;
+                return { background: '#E8B8B8', color: '#8B4A4A' };
             default:
-                return `${baseClass} bg-purple-600 text-white hover:bg-purple-700`;
+                return { background: 'linear-gradient(135deg, #B8C6E6 0%, #A8B5D5 100%)', color: '#fff' };
         }
     };
 
+    const handleCardClick = (e) => {
+        if (!e.target.closest('button')) {
+            onViewDetails?.(product);
+        }
+    };
+
+    const comp = getCompatibilityColor(product.compatibility);
+
     return (
-        <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all overflow-hidden">
-            <div className="h-48 bg-gray-100 overflow-hidden relative">
+        <div
+            className="rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg"
+            onClick={handleCardClick}
+            style={{
+                background: 'rgba(255,255,255,0.9)',
+                border: '1px solid #E8D4DC',
+                boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+            }}
+        >
+            <div className="h-48 overflow-hidden relative" style={{ background: '#F5F0F2' }}>
                 {!imageError ? (
                     <img
                         src={product.image}
@@ -128,26 +142,36 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
                         onError={() => setImageError(true)}
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-purple-100">
+                    <div
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #F0E4E8 0%, #E8DCE0 100%)' }}
+                    >
                         <div className="text-6xl">🧴</div>
                     </div>
                 )}
             </div>
 
-            <div className="p-6">
+            <div className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${getCompatibilityColor(product.compatibility)}`}>
+                    <span
+                        className="px-3 py-1 rounded-full text-sm font-bold"
+                        style={{ background: comp.bg, color: comp.text }}
+                    >
                         {product.compatibility}% Match
                     </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
-                <p className="text-gray-600 text-sm mb-3">{product.brand}</p>
+                <h3 className="text-lg font-bold mb-1" style={{ color: '#8B4367' }}>{product.name}</h3>
+                <p className="text-sm mb-3" style={{ color: '#A67B8B' }}>{product.brand}</p>
 
                 <div className="mb-4">
                     <div className="flex flex-wrap gap-1">
                         {product.benefits?.slice(0, 3).map((benefit, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-rose-50 text-rose-600 text-xs rounded-full">
+                            <span
+                                key={idx}
+                                className="px-2 py-1 text-xs rounded-full"
+                                style={{ background: '#F0E4E8', color: '#8B6B7B' }}
+                            >
                                 {benefit}
                             </span>
                         ))}
@@ -155,24 +179,29 @@ export default function ProductCard({ product, onPurchaseSuccess, onViewDetails 
                 </div>
 
                 <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-gray-900">{product.price}</span>
-                    <div className="flex items-center text-purple-600">
-                        <span className="text-sm font-semibold">{product.solana} SOL</span>
-                    </div>
+                    <span className="text-2xl font-bold" style={{ color: '#8B4367' }}>{product.price}</span>
+                    <span className="text-sm font-semibold" style={{ color: '#8B6B9B' }}>{product.solana} SOL</span>
                 </div>
 
                 <div className="flex gap-2">
-                    <button
-                        onClick={() => onViewDetails(product)}
-                        disabled={isProcessing || loading}
-                        className="flex-1 bg-rose-600 text-white py-2 rounded-lg font-semibold hover:bg-rose-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    <a
+                        href={product.productUrl || product.brandUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className={`flex-1 py-2 rounded-xl font-semibold transition-colors text-center no-underline ${(isProcessing || loading) ? 'opacity-50 pointer-events-none' : ''}`}
+                        style={{
+                            background: 'linear-gradient(135deg, #D4A5B8 0%, #C495A8 100%)',
+                            color: '#fff',
+                        }}
                     >
-                        View Details
-                    </button>
+                        Product Link
+                    </a>
                     <button
                         onClick={handlePurchase}
                         disabled={isProcessing || loading || buttonState === 'success'}
-                        className={getButtonClass()}
+                        className={`flex-1 py-2 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${buttonState === 'error' ? 'animate-shake' : ''}`}
+                        style={getButtonStyle()}
                     >
                         {getButtonContent()}
                     </button>
