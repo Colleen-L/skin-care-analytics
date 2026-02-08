@@ -80,10 +80,9 @@ def extract_text(image_path):
                corrected_text.append(corrected_word)
        else:
              corrected_text.append(word)
-    print(" ".join(corrected_text))
     return(" ".join(corrected_text))
 # Testing the function with an example image
-extract_text("./image.cfm.jpeg")
+# extract_text("./image.cfm.jpeg")
 
 
 
