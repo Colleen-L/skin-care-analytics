@@ -12,6 +12,7 @@ Apricot Kernel Oil
 Arbutin
 Argan Oil
 Argireline
+Ascorbate
 Ascorbyl Glucoside
 Astaxanthin
 Avocado Oil
@@ -131,6 +132,7 @@ Oxybenzone
 Panthenol
 Parabens
 Peppermint Oil
+Petrolatum
 Petroleum Jelly
 PHA
 Phenoxyethanol
@@ -208,6 +210,7 @@ Vitamin E
 Vitamin F
 Vitamin K
 Volcanic Ash
+Water
 Willow Bark Extract
 Xanthan Gum
 Zinc
