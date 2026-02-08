@@ -1,6 +1,7 @@
 from email.mime import text
 import pytesseract
 from spellchecker import SpellChecker
+from PIL import Image
 import re
 import cv2
 import numpy as np
@@ -19,6 +20,10 @@ def preprocess_for_ocr(image_path):
     kernel = np.ones((1, 1), np.uint8)
     img = cv2.dilate(img, kernel, iterations=1)
     img = cv2.erode(img, kernel, iterations=1)
+
+    # Convert to PIL object for pytesseract
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = Image.fromarray(img_rgb)
     
     return img
 
@@ -65,6 +70,7 @@ def extract_text(image_path):
     misspelled = spell.unknown(words)
     corrected_text = []
     for word in words:
+       word = word.strip()
        if word in misspelled:
            # Get the one most likely correction
            corrected_word = spell.correction(word)
@@ -75,7 +81,7 @@ def extract_text(image_path):
        else:
              corrected_text.append(word)
     print(" ".join(corrected_text))
-    #return(" ".join(corrected_text))
+    return(" ".join(corrected_text))
 # Testing the function with an example image
 extract_text("./image.cfm.jpeg")
 
