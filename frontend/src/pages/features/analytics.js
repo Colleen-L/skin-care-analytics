@@ -37,7 +37,9 @@ export default function Analytics() {
     ];
 
     const getChangeColor = (change) => {
-        return change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-600';
+        if (change > 0) return { color: '#5A8B5A' };
+        if (change < 0) return { color: '#8B4A4A' };
+        return { color: '#A67B8B' };
     };
 
     const getChangeIcon = (change) => {
@@ -52,27 +54,39 @@ export default function Analytics() {
                 <title>Analytics Dashboard - SkinCare AI</title>
             </Head>
 
-            <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-100">
-                {/* Header */}
-                <header className="bg-white shadow-sm sticky top-0 z-10">
-                    <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                        <div className="flex items-center">
+            <div className="min-h-screen" style={{ background: '#fef2f9' }}>
+                {/* Header - Match products page style */}
+                <header
+                    className="sticky top-0 z-10 border-b"
+                    style={{
+                        background: 'rgba(255,255,255,0.9)',
+                        borderColor: '#E8D4DC',
+                    }}
+                >
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
                             <button
                                 onClick={() => router.push('/home')}
-                                className="mr-4 p-2 hover:bg-gray-100 rounded-lg"
+                                className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:opacity-80"
+                                style={{
+                                    background: '#F5E6DC',
+                                    border: '2px solid #D4A5B8',
+                                    color: '#8B4367',
+                                }}
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
                             </button>
-                            <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+                            <h1 className="text-2xl font-bold" style={{ color: '#8B4367' }}>Analytics</h1>
                         </div>
 
                         {/* Time Range Selector */}
                         <select
                             value={timeRange}
                             onChange={(e) => setTimeRange(e.target.value)}
-                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-rose-600 focus:outline-none"
+                            className="px-4 py-2 rounded-xl font-semibold"
+                            style={{ border: '1px solid #E8D4DC', color: '#8B4367', background: 'rgba(255,255,255,0.9)' }}
                         >
                             <option value="7days">Last 7 days</option>
                             <option value="30days">Last 30 days</option>
@@ -82,33 +96,41 @@ export default function Analytics() {
                     </div>
                 </header>
 
-                <main className="max-w-7xl mx-auto px-4 py-8">
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
                     {/* Skin Progress Overview */}
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Skin Progress 📊</h2>
+                        <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Skin Progress 📊</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {Object.entries(skinMetrics).map(([key, data]) => (
-                                <div key={key} className="bg-white rounded-xl p-6 shadow-sm">
+                                <div
+                                    key={key}
+                                    className="rounded-xl p-6"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.8)',
+                                        border: '1px solid #E8D4DC',
+                                        boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+                                    }}
+                                >
                                     <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-gray-600 capitalize">{key}</h3>
-                                        <span className={`text-2xl ${getChangeColor(data.change)}`}>
+                                        <h3 className="capitalize" style={{ color: '#A67B8B' }}>{key}</h3>
+                                        <span className="text-2xl" style={getChangeColor(data.change)}>
                                             {getChangeIcon(data.change)}
                                         </span>
                                     </div>
                                     <div className="flex items-end justify-between">
                                         <div>
-                                            <p className="text-3xl font-bold text-gray-900">{data.current}</p>
-                                            <p className="text-sm text-gray-500">Score</p>
+                                            <p className="text-3xl font-bold" style={{ color: '#8B4367' }}>{data.current}</p>
+                                            <p className="text-sm" style={{ color: '#A67B8B' }}>Score</p>
                                         </div>
-                                        <div className={`text-right ${getChangeColor(data.change)}`}>
+                                        <div className="text-right" style={getChangeColor(data.change)}>
                                             <p className="text-lg font-bold">{data.change > 0 ? '+' : ''}{data.change}%</p>
                                             <p className="text-xs">vs last period</p>
                                         </div>
                                     </div>
-                                    <div className="mt-4 bg-gray-200 rounded-full h-2">
+                                    <div className="mt-4 rounded-full h-2" style={{ background: '#F0E4E8' }}>
                                         <div
-                                            className="bg-gradient-to-r from-rose-400 to-pink-500 h-2 rounded-full transition-all"
-                                            style={{ width: `${data.current}%` }}
+                                            className="h-2 rounded-full transition-all"
+                                            style={{ width: `${data.current}%`, background: 'linear-gradient(90deg, #D4A5B8 0%, #B8C6E6 100%)' }}
                                         ></div>
                                     </div>
                                 </div>
@@ -118,28 +140,33 @@ export default function Analytics() {
 
                     {/* Consistency Tracker */}
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Routine Consistency 🎯</h2>
-                        <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Routine Consistency 🎯</h2>
+                        <div
+                            className="rounded-xl p-6"
+                            style={{
+                                background: 'rgba(255,255,255,0.8)',
+                                border: '1px solid #E8D4DC',
+                                boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+                            }}
+                        >
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <div className="text-center">
                                     <div className="relative inline-flex items-center justify-center">
                                         <svg className="w-32 h-32">
                                             <circle
-                                                className="text-gray-200"
                                                 strokeWidth="8"
-                                                stroke="currentColor"
+                                                stroke="#E8D4DC"
                                                 fill="transparent"
                                                 r="56"
                                                 cx="64"
                                                 cy="64"
                                             />
                                             <circle
-                                                className="text-rose-600"
                                                 strokeWidth="8"
                                                 strokeDasharray={2 * Math.PI * 56}
                                                 strokeDashoffset={2 * Math.PI * 56 * (1 - consistencyData.percentage / 100)}
                                                 strokeLinecap="round"
-                                                stroke="currentColor"
+                                                stroke="#D4A5B8"
                                                 fill="transparent"
                                                 r="56"
                                                 cx="64"
@@ -147,39 +174,45 @@ export default function Analytics() {
                                                 transform="rotate(-90 64 64)"
                                             />
                                         </svg>
-                                        <span className="absolute text-3xl font-bold text-gray-900">
+                                        <span className="absolute text-3xl font-bold" style={{ color: '#8B4367' }}>
                                             {consistencyData.percentage}%
                                         </span>
                                     </div>
-                                    <p className="text-gray-600 font-medium mt-2">Overall</p>
+                                    <p className="font-medium mt-2" style={{ color: '#A67B8B' }}>Overall</p>
                                 </div>
 
                                 <div className="text-center">
-                                    <div className="text-5xl font-bold text-rose-600">{consistencyData.streak}</div>
-                                    <p className="text-gray-600 font-medium">Day Streak 🔥</p>
+                                    <div className="text-5xl font-bold" style={{ color: '#D4A5B8' }}>{consistencyData.streak}</div>
+                                    <p className="font-medium" style={{ color: '#A67B8B' }}>Day Streak 🔥</p>
                                 </div>
 
                                 <div className="text-center">
-                                    <div className="text-5xl font-bold text-green-600">{consistencyData.totalDays - consistencyData.missedDays}</div>
-                                    <p className="text-gray-600 font-medium">Days Completed ✅</p>
+                                    <div className="text-5xl font-bold" style={{ color: '#5A8B5A' }}>{consistencyData.totalDays - consistencyData.missedDays}</div>
+                                    <p className="font-medium" style={{ color: '#A67B8B' }}>Days Completed ✅</p>
                                 </div>
 
                                 <div className="text-center">
-                                    <div className="text-5xl font-bold text-gray-400">{consistencyData.missedDays}</div>
-                                    <p className="text-gray-600 font-medium">Days Missed</p>
+                                    <div className="text-5xl font-bold" style={{ color: '#C4A8B4' }}>{consistencyData.missedDays}</div>
+                                    <p className="font-medium" style={{ color: '#A67B8B' }}>Days Missed</p>
                                 </div>
                             </div>
 
                             {/* Token Incentive */}
-                            <div className="mt-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg p-4 text-white">
-                                <div className="flex items-center justify-between">
+                            <div
+                                className="mt-6 rounded-xl p-4"
+                                style={{
+                                    background: 'linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%)',
+                                    border: '1px solid rgba(212,165,184,0.5)',
+                                }}
+                            >
+                                <div className="flex items-center justify-between text-white">
                                     <div>
                                         <p className="font-semibold">Tokens Earned This Month</p>
                                         <p className="text-2xl font-bold">87 🪙</p>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-purple-100">Keep your streak going!</p>
-                                        <p className="text-sm text-purple-100">13 more for bonus reward</p>
+                                    <div className="text-right opacity-90">
+                                        <p className="text-sm">Keep your streak going!</p>
+                                        <p className="text-sm">13 more for bonus reward</p>
                                     </div>
                                 </div>
                             </div>
@@ -188,22 +221,29 @@ export default function Analytics() {
 
                     {/* Product Usage */}
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Usage 🧴</h2>
-                        <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Product Usage 🧴</h2>
+                        <div
+                            className="rounded-xl p-6"
+                            style={{
+                                background: 'rgba(255,255,255,0.8)',
+                                border: '1px solid #E8D4DC',
+                                boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+                            }}
+                        >
                             <div className="space-y-4">
                                 {productUsage.map((product) => (
                                     <div key={product.name}>
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="font-medium text-gray-900">{product.name}</span>
+                                            <span className="font-medium" style={{ color: '#8B4367' }}>{product.name}</span>
                                             <div className="text-right">
-                                                <span className="text-sm font-bold text-gray-900">{product.uses}/{consistencyData.totalDays}</span>
-                                                <span className="text-sm text-gray-500 ml-2">({product.percentage}%)</span>
+                                                <span className="text-sm font-bold" style={{ color: '#8B4367' }}>{product.uses}/{consistencyData.totalDays}</span>
+                                                <span className="text-sm ml-2" style={{ color: '#A67B8B' }}>({product.percentage}%)</span>
                                             </div>
                                         </div>
-                                        <div className="bg-gray-200 rounded-full h-3">
+                                        <div className="rounded-full h-3" style={{ background: '#F0E4E8' }}>
                                             <div
-                                                className="bg-gradient-to-r from-rose-400 to-pink-500 h-3 rounded-full transition-all"
-                                                style={{ width: `${product.percentage}%` }}
+                                                className="h-3 rounded-full transition-all"
+                                                style={{ width: `${product.percentage}%`, background: 'linear-gradient(90deg, #D4A5B8 0%, #B8C6E6 100%)' }}
                                             ></div>
                                         </div>
                                     </div>
@@ -214,40 +254,54 @@ export default function Analytics() {
 
                     {/* Cycle Tracking */}
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Cycle Impact Analysis 🌙</h2>
+                        <h2 className="text-2xl font-bold mb-4" style={{ color: '#8B4367' }}>Cycle Impact Analysis 🌙</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             {cycleTracking.map((phase) => (
-                                <div key={phase.phase} className="bg-white rounded-xl p-6 shadow-sm">
-                                    <h3 className="font-bold text-gray-900 mb-2">{phase.phase} Phase</h3>
+                                <div
+                                    key={phase.phase}
+                                    className="rounded-xl p-6"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.8)',
+                                        border: '1px solid #E8D4DC',
+                                        boxShadow: '0 2px 12px rgba(212,165,184,0.12)',
+                                    }}
+                                >
+                                    <h3 className="font-bold mb-2" style={{ color: '#8B4367' }}>{phase.phase} Phase</h3>
                                     <div className="mb-3">
                                         <div className="flex items-center justify-between mb-1">
-                                            <span className="text-sm text-gray-600">Skin Quality</span>
-                                            <span className="text-sm font-bold text-gray-900">{phase.skinQuality}/100</span>
+                                            <span className="text-sm" style={{ color: '#A67B8B' }}>Skin Quality</span>
+                                            <span className="text-sm font-bold" style={{ color: '#8B4367' }}>{phase.skinQuality}/100</span>
                                         </div>
-                                        <div className="bg-gray-200 rounded-full h-2">
+                                        <div className="rounded-full h-2" style={{ background: '#F0E4E8' }}>
                                             <div
-                                                className="bg-gradient-to-r from-purple-400 to-pink-500 h-2 rounded-full"
-                                                style={{ width: `${phase.skinQuality}%` }}
+                                                className="h-2 rounded-full"
+                                                style={{ width: `${phase.skinQuality}%`, background: 'linear-gradient(90deg, #D4A5B8 0%, #B8C6E6 100%)' }}
                                             ></div>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-gray-600 italic">{phase.notes}</p>
+                                    <p className="text-sm italic" style={{ color: '#A67B8B' }}>{phase.notes}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     {/* Insights */}
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
-                        <h2 className="text-xl font-bold mb-4">✨ AI Insights</h2>
+                    <div
+                        className="rounded-xl p-6"
+                        style={{
+                            background: 'linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%)',
+                            border: '1px solid rgba(212,165,184,0.5)',
+                        }}
+                    >
+                        <h2 className="text-xl font-bold mb-4 text-white">✨ AI Insights</h2>
                         <div className="space-y-3">
-                            <div className="bg-white/20 rounded-lg p-4">
-                                <p className="font-semibold mb-1">🎉 Great Progress!</p>
-                                <p className="text-sm text-blue-50">Your skin hydration improved by 15% this month. Keep up your morning routine!</p>
+                            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.3)' }}>
+                                <p className="font-semibold mb-1 text-white">🎉 Great Progress!</p>
+                                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.95)' }}>Your skin hydration improved by 15% this month. Keep up your morning routine!</p>
                             </div>
-                            <div className="bg-white/20 rounded-lg p-4">
-                                <p className="font-semibold mb-1">💡 Recommendation</p>
-                                <p className="text-sm text-blue-50">Consider using your retinol more consistently during luteal phase to combat breakouts.</p>
+                            <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.3)' }}>
+                                <p className="font-semibold mb-1 text-white">💡 Recommendation</p>
+                                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.95)' }}>Consider using your retinol more consistently during luteal phase to combat breakouts.</p>
                             </div>
                         </div>
                     </div>

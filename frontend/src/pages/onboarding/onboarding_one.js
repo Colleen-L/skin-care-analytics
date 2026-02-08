@@ -86,44 +86,64 @@ export default function Onboarding() {
                 <title>Onboarding - SkinCare AI</title>
             </Head>
 
-            <div className="min-h-screen bg-white">
-                {/* Header */}
-                <header className="bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
-                    <h1 className="text-lg font-semibold">Onboarding</h1>
-                    <span className="text-gray-400">&#60;/&#62;</span>
+            <div className="min-h-screen flex flex-col" style={{ background: '#fef2f9' }}>
+                {/* Header - Pastel layout */}
+                <header
+                    className="flex-shrink-0 border-b px-4 sm:px-6 py-4 flex items-center"
+                    style={{
+                        background: 'rgba(255,255,255,0.9)',
+                        borderColor: '#E8D4DC',
+                    }}
+                >
+                    <h1 className="text-xl font-bold" style={{ color: '#8B4367' }}>Onboarding</h1>
                 </header>
 
-                <main className="max-w-2xl mx-auto px-4 py-8">
+                <main className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+                    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col">
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div
-                            className="w-full h-2 rounded-full bg-pink-200 overflow-hidden"
+                            className="w-full h-2.5 rounded-full overflow-hidden"
+                            style={{ background: '#F0E4E8' }}
                             role="progressbar"
                         >
                             <div
-                                className="h-full rounded-full bg-rose-600 transition-all duration-300"
-                                style={{ width: `${progressPercent}%` }}
+                                className="h-full rounded-full transition-all duration-300"
+                                style={{ width: `${progressPercent}%`, background: 'linear-gradient(90deg, #D4A5B8 0%, #B8C6E6 100%)' }}
                             />
                         </div>
                     </div>
 
+                    {/* Content Card - Structured layout below progress bar */}
+                    <div
+                        className="flex-1 flex flex-col rounded-2xl p-6 sm:p-8 mb-6"
+                        style={{
+                            background: 'rgba(255,255,255,0.9)',
+                            border: '1px solid #E8D4DC',
+                            boxShadow: '0 2px 12px rgba(212,165,184,0.15)',
+                        }}
+                    >
                     {/* Step 1: Skin Color */}
                     {step === 1 && (
                         <div className="text-center">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                            <h2 className="text-xl font-bold mb-6" style={{ color: '#8B4367' }}>
                                 What color is closest to your skin color?
                             </h2>
-                            <div className="grid grid-cols-3 gap-4 mb-12">
+                            <div className="grid grid-cols-3 gap-4 mb-2">
                                 {SKIN_COLORS.map((c) => (
                                     <button
                                         key={c.id}
                                         onClick={() => handleSelect('skinColor', c.id, c.name)}
-                                        className={`aspect-square rounded-lg border-2 transition-all ${
+                                        className={`aspect-square rounded-xl border-2 transition-all ${
                                             profile.skinColor === c.id
-                                                ? 'border-rose-600 ring-2 ring-rose-200'
-                                                : 'border-gray-200 hover:border-pink-300'
+                                                ? 'ring-2'
+                                                : ''
                                         }`}
-                                        style={{ backgroundColor: c.color }}
+                                        style={{
+                                            backgroundColor: c.color,
+                                            borderColor: profile.skinColor === c.id ? '#D4A5B8' : '#E8D4DC',
+                                            boxShadow: profile.skinColor === c.id ? '0 0 0 2px rgba(212,165,184,0.3)' : 'none',
+                                        }}
                                         title={c.name}
                                     />
                                 ))}
@@ -133,22 +153,27 @@ export default function Onboarding() {
 
                     {/* Step 2: Ethnicity */}
                     {step === 2 && (
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                        <div>
+                            <h2 className="text-xl font-bold mb-6 text-center" style={{ color: '#8B4367' }}>
                                 What is your ethnicity?
                             </h2>
-                            <div className="grid grid-cols-2 gap-4 mb-12">
+                            <div className="grid grid-cols-2 gap-4">
                                 {ETHNICITIES.map((e) => (
                                     <button
                                         key={e.id}
                                         onClick={() => handleSelect('ethnicity', e.id, e.name)}
-                                        className={`p-6 rounded-lg border-2 transition-all text-left ${
+                                        className={`p-5 rounded-xl border-2 transition-all text-left ${
                                             profile.ethnicity === e.id
-                                                ? 'border-rose-600 bg-rose-50'
-                                                : 'border-pink-200 bg-pink-50 hover:border-pink-300'
+                                                ? ''
+                                                : ''
                                         }`}
+                                        style={{
+                                            background: profile.ethnicity === e.id ? '#F5F0F2' : 'rgba(255,255,255,0.8)',
+                                            borderColor: profile.ethnicity === e.id ? '#D4A5B8' : '#E8D4DC',
+                                            color: '#8B4367',
+                                        }}
                                     >
-                                        <span className="font-semibold text-gray-900">{e.name}</span>
+                                        <span className="font-semibold">{e.name}</span>
                                     </button>
                                 ))}
                             </div>
@@ -157,23 +182,28 @@ export default function Onboarding() {
 
                     {/* Step 3: Skin Description */}
                     {step === 3 && (
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                        <div>
+                            <h2 className="text-xl font-bold mb-6 text-center" style={{ color: '#8B4367' }}>
                                 What description best describes your skin?
                             </h2>
-                            <div className="grid grid-cols-2 gap-4 mb-12">
+                            <div className="grid grid-cols-2 gap-4">
                                 {SKIN_DESCRIPTIONS.map((s) => (
                                     <button
                                         key={s.id}
                                         onClick={() => handleSelect('skinDescription', s.id, s.name)}
-                                        className={`p-6 rounded-lg border-2 transition-all text-left ${
+                                        className={`p-5 rounded-xl border-2 transition-all text-left ${
                                             profile.skinDescription === s.id
-                                                ? 'border-rose-600 bg-rose-50'
-                                                : 'border-pink-200 bg-pink-50 hover:border-pink-300'
+                                                ? ''
+                                                : ''
                                         }`}
+                                        style={{
+                                            background: profile.skinDescription === s.id ? '#F5F0F2' : 'rgba(255,255,255,0.8)',
+                                            borderColor: profile.skinDescription === s.id ? '#D4A5B8' : '#E8D4DC',
+                                            color: '#8B4367',
+                                        }}
                                     >
-                                        <span className="font-semibold text-gray-900 block">{s.name}</span>
-                                        <span className="text-sm text-gray-600">{s.desc}</span>
+                                        <span className="font-semibold block" style={{ color: '#8B4367' }}>{s.name}</span>
+                                        <span className="text-sm" style={{ color: '#A67B8B' }}>{s.desc}</span>
                                     </button>
                                 ))}
                             </div>
@@ -183,12 +213,15 @@ export default function Onboarding() {
                     {/* Step 4: Age Slider */}
                     {step === 4 && (
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+                            <h2 className="text-xl font-bold mb-6 text-center" style={{ color: '#8B4367' }}>
                                 What is your current age?
                             </h2>
-                            <div className="mb-12">
-                                <div className="inline-block px-8 py-4 bg-pink-100 rounded-lg mb-6">
-                                    <span className="text-3xl font-bold text-gray-900">{profile.age}</span>
+                            <div className="space-y-6">
+                                <div
+                                    className="inline-block px-8 py-4 rounded-xl mb-2"
+                                    style={{ background: '#F5F0F2', border: '1px solid #E8D4DC' }}
+                                >
+                                    <span className="text-3xl font-bold" style={{ color: '#8B4367' }}>{profile.age}</span>
                                 </div>
                                 <input
                                     type="range"
@@ -196,7 +229,10 @@ export default function Onboarding() {
                                     max="100"
                                     value={profile.age}
                                     onChange={(e) => setProfile({ ...profile, age: parseInt(e.target.value, 10) })}
-                                    className="w-full h-3 bg-pink-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-rose-600 [&::-webkit-slider-thumb]:cursor-pointer"
+                                    className="w-full h-3 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
+                                    style={{
+                                        background: '#F0E4E8',
+                                    }}
                                 />
                             </div>
                         </div>
@@ -205,76 +241,93 @@ export default function Onboarding() {
                     {/* Step 5: Loading */}
                     {step === 5 && (
                         <div className="text-center py-16">
-                            <p className="text-xl font-medium text-gray-900 mb-6">
+                            <p className="text-lg font-medium mb-6" style={{ color: '#8B4367' }}>
                                 Constructing profile for optimized skincare routine......
                             </p>
-                            <div className="w-32 h-32 mx-auto rounded-lg bg-pink-200 animate-pulse" />
+                            <div
+                                className="w-28 h-28 mx-auto rounded-2xl animate-pulse"
+                                style={{ background: 'linear-gradient(135deg, #F0E4E8 0%, #E8DCE0 100%)', border: '1px solid #E8D4DC' }}
+                            />
                         </div>
                     )}
 
                     {/* Step 6: Preferences Summary */}
                     {step === 6 && (
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                            <h2 className="text-xl font-bold mb-6 text-center" style={{ color: '#8B4367' }}>
                                 Your Preferences
                             </h2>
-                            <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4 mb-8">
-                                <div className="flex justify-between py-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Skin color</span>
-                                    <span className="font-medium">{SKIN_COLORS.find(c => c.id === profile.skinColor)?.name || profile.skinColorName}</span>
+                            <div
+                                className="rounded-xl p-6 space-y-4 mb-6"
+                                style={{
+                                    background: 'rgba(255,255,255,0.8)',
+                                    border: '1px solid #E8D4DC',
+                                }}
+                            >
+                                <div className="flex justify-between py-3 border-b" style={{ borderColor: '#F0E4E8' }}>
+                                    <span style={{ color: '#8B4367' }}>Skin color</span>
+                                    <span className="font-medium" style={{ color: '#8B4367' }}>{SKIN_COLORS.find(c => c.id === profile.skinColor)?.name || profile.skinColorName}</span>
                                 </div>
-                                <div className="flex justify-between py-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Ethnicity</span>
-                                    <span className="font-medium">{ETHNICITIES.find(e => e.id === profile.ethnicity)?.name || profile.ethnicity}</span>
+                                <div className="flex justify-between py-3 border-b" style={{ borderColor: '#F0E4E8' }}>
+                                    <span style={{ color: '#8B4367' }}>Ethnicity</span>
+                                    <span className="font-medium" style={{ color: '#8B4367' }}>{ETHNICITIES.find(e => e.id === profile.ethnicity)?.name || profile.ethnicity}</span>
                                 </div>
-                                <div className="flex justify-between py-3 border-b border-gray-100">
-                                    <span className="text-gray-600">Skin type</span>
-                                    <span className="font-medium">{SKIN_DESCRIPTIONS.find(s => s.id === profile.skinDescription)?.name || profile.skinDescription}</span>
+                                <div className="flex justify-between py-3 border-b" style={{ borderColor: '#F0E4E8' }}>
+                                    <span style={{ color: '#8B4367' }}>Skin type</span>
+                                    <span className="font-medium" style={{ color: '#8B4367' }}>{SKIN_DESCRIPTIONS.find(s => s.id === profile.skinDescription)?.name || profile.skinDescription}</span>
                                 </div>
                                 <div className="flex justify-between py-3">
-                                    <span className="text-gray-600">Age</span>
-                                    <span className="font-medium">{profile.age}</span>
+                                    <span style={{ color: '#8B4367' }}>Age</span>
+                                    <span className="font-medium" style={{ color: '#8B4367' }}>{profile.age}</span>
                                 </div>
                             </div>
-                            <p className="text-center text-gray-600 text-sm mb-6">
+                            <p className="text-center text-sm" style={{ color: '#8B4367' }}>
                                 Your profile is ready. We&apos;ll use this to personalize your experience.
                             </p>
                         </div>
                     )}
+                    </div>
 
-                    {/* Navigation */}
-                    {step <= 4 && (
-                        <div className="flex justify-between items-center">
+                    {/* Navigation - always at bottom */}
+                    {step <= 4 ? (
+                        <div className="flex justify-between items-center mt-8 pt-6">
                             <button
                                 onClick={handleBack}
                                 disabled={step === 1}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="px-5 py-2.5 rounded-xl font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                style={{ color: '#8B4367' }}
                             >
                                 Back
                             </button>
                             <button
                                 onClick={handleNext}
                                 disabled={!isStepComplete()}
-                                className="w-14 h-14 rounded-full bg-rose-600 text-white flex items-center justify-center hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all ml-auto"
+                                className="w-14 h-14 rounded-full flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all ml-auto"
+                                style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%)', color: '#fff' }}
                             >
                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z" />
                                 </svg>
                             </button>
                         </div>
-                    )}
-
-                    {step === 6 && (
-                        <div className="flex justify-end">
+                    ) : step === 6 ? (
+                        <div className="flex justify-end mt-8 pt-6">
                             <button
                                 onClick={handleNext}
-                                className="px-8 py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-all"
+                                className="px-8 py-3 rounded-xl font-semibold transition-all"
+                                style={{ background: 'linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%)', color: '#fff' }}
                             >
                                 Go to Dashboard
                             </button>
                         </div>
-                    )}
+                    ) : null}
+                    </div>
                 </main>
+                <style jsx global>{`
+                    input[type="range"]::-webkit-slider-thumb {
+                        background: linear-gradient(135deg, #D4A5B8 0%, #B8C6E6 100%) !important;
+                    }
+                `}</style>
             </div>
         </>
     );
