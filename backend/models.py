@@ -8,7 +8,7 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
-
+    
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
@@ -17,9 +17,10 @@ class User(Base):
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_token = Column(String(128), nullable=True)       
     verification_token_expires = Column(DateTime, nullable=True) 
-
+    
     # Relationships
     entries = relationship("SkinCareEntry", back_populates="user")
+    skin_analyses = relationship("SkinAnalysis", back_populates="user")
 
 
 class SkinCareEntry(Base):
@@ -51,3 +52,15 @@ class ProductUsage(Base):
     
     # Relationships
     entry = relationship("SkinCareEntry", back_populates="products")
+
+
+class SkinAnalysis(Base):
+    __tablename__ = "skin_analyses"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    result = Column(Text, nullable=True)  # Store the JSON result as text
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Relationships
+    user = relationship("User", back_populates="skin_analyses")
