@@ -7,6 +7,9 @@ export default function Home() {
   const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const [userName, setUserName] = useState('User');
+  const [hoveredId, setHoveredId] = useState(null);
+
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('access_token');
@@ -42,6 +45,7 @@ export default function Home() {
 
     fetchUserData();
   }, [router]);
+
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -148,38 +152,42 @@ export default function Home() {
 
           {/* Buttons section - half */}
           <div className="flex-1 min-w-0 flex flex-col justify-center items-center gap-5 sm:gap-6">
-            {buttons.map((btn) => (
-              <div
-                key={btn.id}
-                onClick={() => router.push(btn.route)}
-                className="flex items-center justify-center gap-3 cursor-pointer group"
+          {buttons.map((btn) => (
+            <div
+              key={btn.id}
+              onClick={() => router.push(btn.route)}
+              onMouseEnter={() => setHoveredId(btn.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              className="flex items-center justify-center gap-3 cursor-pointer group"
+            >
+              <img
+                src={hoveredId === btn.id ? btn.gif : btn.gif.replace('.gif', '.png')}
+                alt=""
+                className="w-32 h-32 sm:w-40 sm:h-40 object-contain flex-shrink-0"
+              />
+
+              <button
+                type="button"
+                className={`
+                  max-w-[280px]
+                  h-[64px] sm:h-[72px]
+                  px-6 sm:px-8
+                  rounded-xl
+                  bg-gradient-to-br ${btn.gradient}
+                  ${btn.shadow}
+                  group-hover:scale-[1.02] group-hover:shadow-lg
+                  active:scale-[0.98]
+                  transition-all duration-200 ease-out
+                  flex items-center justify-center
+                `}
               >
-                <img
-                  src={btn.gif}
-                  alt=""
-                  className="w-32 h-32 sm:w-40 sm:h-40 object-contain flex-shrink-0 animate-float"
-                />
-                <button
-                  type="button"
-                  className={`
-                    max-w-[280px]
-                    h-[64px] sm:h-[72px]
-                    px-6 sm:px-8
-                    rounded-xl
-                    bg-gradient-to-br ${btn.gradient}
-                    ${btn.shadow}
-                    group-hover:scale-[1.02] group-hover:shadow-lg
-                    active:scale-[0.98]
-                    transition-all duration-200 ease-out
-                    flex items-center justify-center
-                  `}
-                >
-                  <span className="text-white text-base sm:text-lg font-bold tracking-tight drop-shadow-sm text-center">
-                    {btn.title}
-                  </span>
-                </button>
-              </div>
-            ))}
+                <span className="text-white text-base sm:text-lg font-bold tracking-tight drop-shadow-sm text-center">
+                  {btn.title}
+                </span>
+              </button>
+            </div>
+          ))}
+
           </div>
         </main>
       </div>
